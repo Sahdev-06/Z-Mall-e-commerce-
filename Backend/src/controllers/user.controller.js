@@ -9,7 +9,7 @@ const generateAccessAndRefreshToken = async (userId) => {
         const user = await User.findById(userId)
     
         const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateAccessToken()
+        const refreshToken = user.generateRefreshToken()
     
         user.refreshToken = refreshToken
         await user.save({validateBeforeSave : false})
@@ -145,7 +145,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 })
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+    const incomingRefreshToken = req.cookies.refreshToken || req.body?.refreshToken
 
     if(!incomingRefreshToken) {
         throw new ApiError(401, "Unauthorized request");
@@ -187,9 +187,65 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 })
 
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+    const { oldPassword, newPassword } = req.body
+    console.log("old : ", oldPassword, "new : ", newPassword)
+    console.log(req.user)
+
+    const user = await User.findById(req.user?._id)
+
+    const isOldPasswordValid = await user.isPasswordCorrect(oldPassword)
+
+    if(!isOldPasswordValid) {
+        throw new ApiError(400, "Invalid password")
+    }
+
+    user.password = newPassword
+    await user.save({validateBeforeSave : false})
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
+})
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res
+    .status(200)
+    .json(new ApiResponse(
+        200,
+        req.user,
+        "User fetched successfully"
+    ))
+})
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+    const { fullName } = req.body
+
+    if(!fullName) {
+        throw new ApiError(400, "fullName is required")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set : { fullName }
+        },
+        {
+            new : true
+        }
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Account details updated successfully") )
+})
+
 export {
     registerUser,
     loginUser,
     logoutUser,
-    refreshAccessToken
+    refreshAccessToken,
+    changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetails
 }
