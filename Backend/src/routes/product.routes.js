@@ -2,11 +2,12 @@ import { Router } from "express"
 import { createProduct, deleteProduct, updateProduct } from "../controllers/product.controller.js";
 import { verifyAdmin } from "../middlewares/admin.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router()
 
-router.route("/create").post(verifyJWT, verifyAdmin ,createProduct)
-router.route("/update/:id").patch(verifyJWT, verifyAdmin, updateProduct)
+router.route("/create").post(verifyJWT, verifyAdmin, upload.array("image"), createProduct)
+router.route("/update/:id").patch(verifyJWT, verifyAdmin, upload.array("image"), updateProduct)
 router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteProduct)
 
 
