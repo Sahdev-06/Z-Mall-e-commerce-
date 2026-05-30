@@ -2,18 +2,27 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Product } from "../models/product.model.js";
+import mongoose from "mongoose";
 
 
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, price } = req.body
+    const { name, description, price } = req.body;
 
-    if (
-    !name?.trim() ||
-    !description?.trim() ||
-    price == null ||
-    price <= 0
-    ) {
-    throw new ApiError(400, "Invalid product data");
+    if (!name || String(name).trim() === "") {
+        throw new ApiError(400, "Product name is required");
+    }
+    if (!description || String(description).trim() === "") {
+        throw new ApiError(400, "Product description is required");
+    }
+
+    const priceNum = Number(price);
+    if (Number.isNaN(priceNum) || priceNum <= 0) {
+        throw new ApiError(400, "Price must be a positive number");
+    }
+
+    const existing = await Product.findOne({ name: String(name).trim() });
+    if (existing) {
+        throw new ApiError(409, "A product with this name already exists");
     }
 
     const product = await Product.create({
@@ -36,31 +45,34 @@ const createProduct = asyncHandler(async (req, res) => {
 })
 
 const updateProduct = asyncHandler(async (req, res) => {
-    const { name, description, price } = req.body
-    const { id } = req.params
+    const { name, description, price } = req.body;
+    const { id } = req.params;
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid product ID");
+    }
 
     const updateDetails = {};
 
-    // Only add name if it's provided and not empty
-    if (typeof name === "string" && name.trim() !== "") {
-        updateDetails.name = name.trim();
+    if (name !== undefined) {
+        if (String(name).trim() === "") throw new ApiError(400, "Name cannot be empty");
+        updateDetails.name = String(name).trim();
     }
 
-    // Only add description if it's provided and not empty
-    if (typeof description === "string" && description.trim() !== "") {
-        updateDetails.description = description.trim();
+    if (description !== undefined) {
+        if (String(description).trim() === "") throw new ApiError(400, "Description cannot be empty");
+        updateDetails.description = String(description).trim();
     }
 
-    // Only add price if it's provided (numbers are allowed to be 0)
-    if (typeof price === "number") {
-        updateDetails.price = price;
+    if (price !== undefined) {
+        const priceNum = Number(price);
+        if (Number.isNaN(priceNum) || priceNum <= 0) {
+            throw new ApiError(400, "Price must be a positive number");
+        }
+        updateDetails.price = priceNum;
     }
 
-    if (
-    name === undefined &&
-    description === undefined &&
-    price === undefined
-    ) {
+    if (Object.keys(updateDetails).length === 0) {
         throw new ApiError(400, "At least one field is required to update");
     }
 
@@ -72,8 +84,8 @@ const updateProduct = asyncHandler(async (req, res) => {
         { new : true }
     )
 
-    if(!product) {
-        throw new ApiError(404, "Product not found ")
+    if (!product) {
+        throw new ApiError(404, "Product not found");
     }
 
     return res
@@ -82,17 +94,16 @@ const updateProduct = asyncHandler(async (req, res) => {
 })
 
 const deleteProduct = asyncHandler(async (req, res) => {
-    const { id } = req.params
+    const { id } = req.params;
 
      // Validate MongoDB ObjectId and prevents from CastError
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         throw new ApiError(400, "Invalid product ID");
     }
 
-    const product = await Product.findByIdAndDelete(id)
-
-    if(!product) {
-        throw new ApiError(404, "Product not found")
+    const product = await Product.findByIdAndDelete(id);
+    if (!product) {
+        throw new ApiError(404, "Product not found");
     }
 
     return res
