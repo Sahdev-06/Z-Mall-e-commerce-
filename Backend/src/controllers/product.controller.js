@@ -2,11 +2,12 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Product } from "../models/product.model.js";
+import { uploadOnCloudinary } from "../services/cloudinary.js";
 import mongoose from "mongoose";
 
 
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, price } = req.body;
+    const { name, description, price, image } = req.body;
 
     if (!name || String(name).trim() === "") {
         throw new ApiError(400, "Product name is required");
@@ -24,11 +25,33 @@ const createProduct = asyncHandler(async (req, res) => {
     if (existing) {
         throw new ApiError(409, "A product with this name already exists");
     }
+    
+    // Handle image upload to Cloudinary
+    const uploadedImage = [];
+
+    if (!req.files || req.files.length === 0) {
+        throw new ApiError(400, "At least one product image is required");
+    }
+
+    const uploadPromises = req.files.map(async (file) => {
+        const response = await uploadOnCloudinary(file.path);
+
+        if (!response) {
+            throw new ApiError(500, "Image upload failed");
+        }
+        return response.url;
+    });
+
+
+    const results = await Promise.all(uploadPromises);
+    uploadedImage.push(...results);
+
 
     const product = await Product.create({
         name,
         description,
-        price
+        price,
+        images: uploadedImage
     })
 
     if(!product) {
@@ -45,7 +68,7 @@ const createProduct = asyncHandler(async (req, res) => {
 })
 
 const updateProduct = asyncHandler(async (req, res) => {
-    const { name, description, price } = req.body;
+    const { name, description, price, image } = req.body;
     const { id } = req.params;
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {

@@ -6,8 +6,8 @@ import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router()
 
-router.route("/create").post(verifyJWT, verifyAdmin, upload.array("image"), createProduct)
-router.route("/update/:id").patch(verifyJWT, verifyAdmin, upload.array("image"), updateProduct)
+router.route("/create").post(verifyJWT, verifyAdmin, upload.array("images"), createProduct)
+router.route("/update/:id").patch(verifyJWT, verifyAdmin, upload.array("images"), updateProduct)
 router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteProduct)
 
 
