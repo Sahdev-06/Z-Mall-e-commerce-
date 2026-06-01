@@ -68,7 +68,7 @@ const createProduct = asyncHandler(async (req, res) => {
 })
 
 const updateProduct = asyncHandler(async (req, res) => {
-    const { name, description, price, image } = req.body;
+    const { name, description, price } = req.body;
     const { id } = req.params;
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -79,6 +79,10 @@ const updateProduct = asyncHandler(async (req, res) => {
 
     if (name !== undefined) {
         if (String(name).trim() === "") throw new ApiError(400, "Name cannot be empty");
+        const existingByName = await Product.findOne({ name: String(name).trim(), _id: { $ne: id } });
+        if (existingByName) {
+            throw new ApiError(409, "A product with this name already exists");
+        }
         updateDetails.name = String(name).trim();
     }
 
@@ -93,6 +97,19 @@ const updateProduct = asyncHandler(async (req, res) => {
             throw new ApiError(400, "Price must be a positive number");
         }
         updateDetails.price = priceNum;
+    }
+     // Handle image uploads if new images are provided
+    if (req.files && req.files.length > 0) {
+        const uploadPromises = req.files.map(async (file) => {
+            const response = await uploadOnCloudinary(file.path);
+            if (!response) {
+                throw new ApiError(500, "Image upload failed");
+            }
+            return response.url;
+        });
+
+        const uploadedImages = await Promise.all(uploadPromises);
+        updateDetails.images = uploadedImages;
     }
 
     if (Object.keys(updateDetails).length === 0) {
