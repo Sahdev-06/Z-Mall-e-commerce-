@@ -30,6 +30,11 @@ const productSchema = new mongoose.Schema(
             default : 0
             // Number of items available in inventory
         },
+        category : {
+            type : String,
+            required : true,
+            trim : true
+        },
         isActive : {
             type : Boolean,
             default : true
