@@ -7,7 +7,8 @@ import mongoose from "mongoose";
 
 
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, price, image } = req.body;
+    const { name, description, price, image, category } = req.body;
+    console.log("category : ", category)
 
     if (!name || String(name).trim() === "") {
         throw new ApiError(400, "Product name is required");
@@ -51,7 +52,8 @@ const createProduct = asyncHandler(async (req, res) => {
         name,
         description,
         price,
-        images: uploadedImage
+        images: uploadedImage,
+        category
     })
 
     if(!product) {
@@ -98,7 +100,8 @@ const updateProduct = asyncHandler(async (req, res) => {
         }
         updateDetails.price = priceNum;
     }
-     // Handle image uploads if new images are provided
+    
+    // Handle image uploads if new images are provided
     if (req.files && req.files.length > 0) {
         const uploadPromises = req.files.map(async (file) => {
             const response = await uploadOnCloudinary(file.path);
@@ -151,8 +154,40 @@ const deleteProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Product deleted successfully"))
 })
 
+const getAllProduct = asyncHandler(async (req, res) => {
+    const product = await Product.find().populate("category")
+
+    if(!product) {
+        throw new ApiError(404, "Products not found")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, product, "All Products fetched successfully"))
+})
+
+const getProductById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid product ID");
+    }
+
+    const product = await Product.findById(id)
+
+    if(!product) {
+        throw new ApiError(404, "Product not found")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, product, "Product fetched successfully"))
+})
+
 export {
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getAllProduct,
+    getProductById
 }

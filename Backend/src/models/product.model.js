@@ -31,9 +31,9 @@ const productSchema = new mongoose.Schema(
             // Number of items available in inventory
         },
         category : {
-            type : String,
-            required : true,
-            trim : true
+            type : mongoose.Schema.Types.ObjectId,
+            ref : "Category",
+            required : true
         },
         isActive : {
             type : Boolean,
