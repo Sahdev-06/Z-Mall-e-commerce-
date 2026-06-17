@@ -15,8 +15,8 @@ const router = Router()
 router.route("/create").post(verifyJWT, verifyAdmin, upload.array("images"), createProduct)
 router.route("/update/:id").patch(verifyJWT, verifyAdmin, upload.array("images"), updateProduct)
 router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteProduct)
-router.route("/get-all-product").get(verifyJWT, verifyAdmin, getAllProduct)
-router.route("/get-product/:id").get(verifyJWT, verifyAdmin, getProductById)
+router.route("/get-all-product").get(getAllProduct)
+router.route("/get-product/:id").get(getProductById)
 
 
 

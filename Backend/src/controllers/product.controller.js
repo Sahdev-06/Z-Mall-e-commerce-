@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 
 
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, price, image, category } = req.body;
+    const { name, description, price, image, category, subCategory } = req.body;
     console.log("category : ", category)
 
     if (!name || String(name).trim() === "") {
@@ -53,7 +53,8 @@ const createProduct = asyncHandler(async (req, res) => {
         description,
         price,
         images: uploadedImage,
-        category
+        category,
+        subCategory
     })
 
     if(!product) {
@@ -155,9 +156,9 @@ const deleteProduct = asyncHandler(async (req, res) => {
 })
 
 const getAllProduct = asyncHandler(async (req, res) => {
-    const product = await Product.find().populate("category")
+    const product = await Product.find().populate("category").populate("subCategory")
 
-    if(!product) {
+    if(!product || product.length === 0) {
         throw new ApiError(404, "Products not found")
     }
 
@@ -173,7 +174,7 @@ const getProductById = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid product ID");
     }
 
-    const product = await Product.findById(id)
+    const product = await Product.findById(id).populate("category").populate("subCategory")
 
     if(!product) {
         throw new ApiError(404, "Product not found")
