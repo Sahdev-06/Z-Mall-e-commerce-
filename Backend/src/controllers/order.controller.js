@@ -91,8 +91,156 @@ const createOrder = asyncHandler(async (req, res) => {
 
 })
 
+const getMyOrders = asyncHandler(async (req, res) => {
+    const { _id : userId } = req.user
 
+    const orders = await Order.find({ user : userId })
+
+    if(!orders || orders.length === 0) {
+        return res
+        .status(200)
+        .json(new ApiResponse(200, [], 'No orders found'))
+    } 
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, orders, 'All orders fetched successfully'))
+})
+
+const getOrderById = asyncHandler(async (req, res) => {
+    const { _id : userId } = req.user;
+    const { id } = req.params;
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid order ID')
+    }
+
+    const order = await Order.findById(id)
+
+    if(!order) {
+        throw new ApiError(404, 'Order not found')
+    }
+
+    if(String(userId) !== String(order.user)) {
+        throw new ApiError(403, 'You have not access')
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, order, 'Order fetched successfully'))
+})
+
+const cancelOrder = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { _id : userId } = req.user;
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid order ID')
+    }
+
+    const order = await Order.findById(id)
+
+    if(!order) {
+        throw new ApiError(404, 'Order not found')
+    }
+
+    if(String(userId) !== String(order.user)) {
+        throw new ApiError(403, 'You have not access')
+    }
+
+    if(order.orderStatus === 'Cancelled') {
+        throw new ApiError(400, 'This order has already cancelled')
+    }
+
+    if(order.orderStatus === 'Delivered') {
+        throw new ApiError(400, 'This order has already delivered')
+    }
+
+    order.orderStatus = 'Cancelled'
+    order.cancelledAt = new Date()
+
+    await order.save()
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, order, 'Order cancelled successfully'))
+})
+
+const getAllOrders = asyncHandler(async (req, res) => {
+    const orders = await Order.find()
+
+    if(!orders || orders.length === 0) {
+        return res
+        .status(200)
+        .json(new ApiResponse(200, [], 'No orders found'))
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, orders, 'All orders fetched successfully'))
+})
+
+const updateOrderStatus = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid order ID')
+    }
+
+    const statusOptions = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
+
+    if(!statusOptions.includes(status)) {
+        throw new ApiError(400, 'Invalid order status')
+    }
+
+    const order = await Order.findById(id)
+
+    if(!order) {
+        throw new ApiError(404, 'Order not found')
+    }
+    
+    if(status === 'Delivered') {
+        order.deliveredAt = new Date()
+    }
+
+    if(status === 'Cancelled') {
+        order.cancelledAt = new Date()
+    }
+    
+    order.orderStatus = status;
+    await order.save()
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, order, 'Order status updated successfully'))
+
+})
+
+const getOrderByIdForAdmin = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid order ID')
+    }
+
+    const order = await Order.findById(id)
+
+    if(!order) {
+        throw new ApiError(404, 'Order not found')
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, order, 'Order fetched successfully'))
+})
 
 export {
-    createOrder
+    createOrder,
+    getMyOrders,
+    getOrderById,
+    cancelOrder,
+    getAllOrders,
+    updateOrderStatus,
+    getOrderByIdForAdmin
 }
