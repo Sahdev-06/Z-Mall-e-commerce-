@@ -4,7 +4,8 @@ import {
     deleteProduct, 
     getAllProduct, 
     getProductById, 
-    updateProduct 
+    updateProduct, 
+    updateProductStock
 } from "../controllers/product.controller.js";
 import { verifyAdmin } from "../middlewares/admin.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -14,6 +15,7 @@ const router = Router()
 
 router.route("/create").post(verifyJWT, verifyAdmin, upload.array("images"), createProduct)
 router.route("/update/:id").patch(verifyJWT, verifyAdmin, upload.array("images"), updateProduct)
+router.route("/:id/stock").patch(verifyJWT, verifyAdmin, updateProductStock)
 router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteProduct)
 router.route("/get-all-product").get(getAllProduct)
 router.route("/get-product/:id").get(getProductById)

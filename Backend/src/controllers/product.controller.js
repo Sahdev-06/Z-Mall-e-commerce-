@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Product } from "../models/product.model.js";
 import { uploadOnCloudinary } from "../services/cloudinary.js";
+import { createInventoryLog } from "../controllers/inventoryLog.controller.js"
 import mongoose from "mongoose";
 
 
@@ -137,6 +138,63 @@ const updateProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, "Product updated successfully"))
 })
 
+const updateProductStock = asyncHandler(async (req, res) => {
+    const { newStock } = req.body
+    const { id } = req.params
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid product ID')
+    }
+
+    if(newStock === undefined) {
+        throw new ApiError(400, 'New stock is required')
+    }
+
+    if(newStock < 0) {
+        throw new ApiError(400, 'Stock should not be less than 0')
+    }
+
+    const product = await Product.findById(id)
+
+    if(!product) {
+        throw new ApiError(404, 'Product not found')
+    }
+
+    const oldStock = product.stock
+
+    if(oldStock === newStock) {
+        return res
+        .status(200)
+        .json(new ApiResponse(200, product, 'No stock changed'))
+    }
+
+    let changedStock = 0;
+    let type;
+    let reason;
+
+    if(oldStock < newStock) {
+        changedStock = newStock - oldStock
+        type = 'IN'
+        reason = 'Restock'
+    } else {
+        changedStock = oldStock - newStock
+        type = 'OUT'
+        reason = 'Manual Adjustment'
+    }
+
+    
+
+    product.stock = newStock
+    await product.save()
+
+    await createInventoryLog(product._id, changedStock, type, reason)
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, product, 'Product stock updated successfully'))
+
+})
+
 const deleteProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -188,6 +246,7 @@ const getProductById = asyncHandler(async (req, res) => {
 export {
     createProduct,
     updateProduct,
+    updateProductStock,
     deleteProduct,
     getAllProduct,
     getProductById
