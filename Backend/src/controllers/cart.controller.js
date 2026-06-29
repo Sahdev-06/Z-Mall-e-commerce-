@@ -10,7 +10,7 @@ const addToCart = asyncHandler(async (req, res) => {
     const { _id : userId } = req.user;
     const { items } = req.body;
     const { productId, quantity } = items[0]
-    console.log("productId : ", productId)
+
     if(!productId || !mongoose.Types.ObjectId.isValid(productId)) {
         throw new ApiError(400, 'Invalid product ID')
     }    

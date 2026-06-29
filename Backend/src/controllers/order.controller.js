@@ -4,6 +4,8 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { Order } from '../models/order.model.js';
 import { Cart } from '../models/cart.model.js';
 import { Address } from '../models/address.model.js';
+import { Product } from '../models/product.model.js'
+import { createInventoryLog } from '../controllers/inventoryLog.controller.js'
 import mongoose from 'mongoose';
 
 
@@ -34,15 +36,15 @@ const createOrder = asyncHandler(async (req, res) => {
     const cartItems = []
 
     for(const item of cart.items) {
-        let items = {}
+        let dataItem = {}
 
-        items.product = item.product._id
-        items.quantity = item.quantity
-        items.price = item.product.price
-        items.productName = item.product.name
-        items.productImage = item.product.images[0]
+        dataItem.product = item.product._id
+        dataItem.quantity = item.quantity
+        dataItem.price = item.product.price
+        dataItem.productName = item.product.name
+        dataItem.productImage = item.product.images[0]
 
-        cartItems.push(items)
+        cartItems.push(dataItem)
     }
 
     const address = await Address.findById(addressId)
@@ -69,6 +71,14 @@ const createOrder = asyncHandler(async (req, res) => {
 
     const finalPrice = (itemsTotalPrice + shippingFee) - discountAmount
 
+    for(const item of cart.items) {
+        const currentStock = item.product.stock
+        const itemQty = item.quantity
+        if (itemQty > currentStock) {
+            throw new ApiError(400, 'Item quantity exceeds available stock')
+        }
+    }
+
     const order = await Order.create({
         user : userId,
         orderItems : cartItems, 
@@ -80,6 +90,24 @@ const createOrder = asyncHandler(async (req, res) => {
 
     if(!order) {
         throw new ApiError(500, 'Order creation failed')
+    }
+
+    // create inventory
+    for(const item of cart.items) {
+        const currentStock = item.product.stock
+        const itemQty = item.quantity
+
+        const productId = String(item.product._id)
+        const product = await Product.findById(productId)
+
+        product.stock = currentStock - itemQty
+        await product.save()
+
+        const changedStock = itemQty;
+        const type = 'OUT';
+        const reason = 'Order placed';
+
+        await createInventoryLog(productId, changedStock, type, reason)
     }
 
     cart.items = []
@@ -160,6 +188,29 @@ const cancelOrder = asyncHandler(async (req, res) => {
     order.cancelledAt = new Date()
 
     await order.save()
+
+    console.log("order : ", order)
+
+    // create inventory
+    for(const item of order.orderItems) {
+        const productId = String(item.product)
+        const itemQty = item.quantity
+
+        const product = await Product.findById(productId)
+
+        if(!product) {
+            throw new ApiError(404, 'Product not found')
+        }
+
+        product.stock += itemQty
+        await product.save()
+
+        const changedStock = itemQty
+        const type = 'IN'
+        const reason = 'Order cancelled'
+
+        await createInventoryLog(productId, changedStock, type, reason)
+    }
 
     return res
     .status(200)
