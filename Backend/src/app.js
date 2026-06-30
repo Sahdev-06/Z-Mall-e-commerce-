@@ -25,6 +25,7 @@ import cartRouter from "./routes/cart.routes.js"
 import orderRouter from "./routes/order.routes.js"
 import paymentRouter from "./routes/payment.routes.js"
 import inventoryRouter from "./routes/inventoryLog.routes.js"
+import reviewRouter from "./routes/review.routes.js"
 
 
 // routes declaration
@@ -37,5 +38,6 @@ app.use("/api/v1/cart", cartRouter)
 app.use("/api/v1/order", orderRouter)
 app.use("/api/v1/payments", paymentRouter)
 app.use("/api/v1/inventory", inventoryRouter)
+app.use("/api/v1/reviews", reviewRouter)
 
 export { app }
