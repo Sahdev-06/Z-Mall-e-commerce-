@@ -192,7 +192,69 @@ const getAllCoupons = asyncHandler(async (req, res) => {
 })
 
 const applyCoupon = asyncHandler(async (req, res) => {
-    // todo 
+    const { code } = req.body;
+    const { _id : userId } = req.user;
+
+    if (!code || code.trim() === "") {
+        throw new ApiError(400, 'Coupon code is required')
+    }
+
+    const normalizedCode = code.trim().toUpperCase();
+    const coupon = await Coupon.findOne({ code : normalizedCode })
+
+    if(!coupon) {
+        throw new ApiError(404, 'This coupon does not exist')
+    }
+
+    if(!coupon.isActive) {
+        throw new ApiError(400, 'This coupon is not active')
+    }
+
+    const today = new Date()
+    if(coupon.expiryDate < today) {
+        throw new ApiError(400, 'This coupon has already expired')
+    }
+
+    const cart = await Cart.findOne({ user : userId }).populate("items.product")
+
+    if(!cart || cart.items.length === 0) {
+        throw new ApiError(404, 'Cart does not exist')
+    }
+
+    let totalAmount = 0;
+    for(const item of cart.items) {
+        totalAmount += item.product.price * item.quantity
+    }
+
+    if(totalAmount < coupon.minimumOrderAmount) {
+        throw new ApiError(400, `minimum order amount must be ${coupon.minimumOrderAmount}`)
+    }
+
+    let discountAmount;
+    let finalAmount;
+
+    if(coupon.discountType === 'Percentage') {
+        discountAmount = totalAmount * (coupon.discount / 100)
+        finalAmount = totalAmount - discountAmount
+    }
+
+    if(coupon.discountType === 'Fixed') {
+        if(totalAmount < coupon.discount) {
+            throw new ApiError(400, 'Insufficient amount to use coupon')
+        }
+        discountAmount = coupon.discount
+        finalAmount = totalAmount - discountAmount
+    }
+
+    const couponDetails = {
+        coupon : coupon.code,
+        discountAmount,
+        finalAmount
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, couponDetails, 'Coupon applied successfully'))
 })
 
 
