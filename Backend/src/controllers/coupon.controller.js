@@ -2,6 +2,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { Coupon } from '../models/coupon.model.js';
+import { Cart } from '../models/cart.model.js';
 import mongoose from 'mongoose';
 
 
@@ -30,7 +31,7 @@ const createCoupon = asyncHandler(async (req, res) => {
     }
 
     const normalizedCode = code.toUpperCase().trim()
-    const isCouponExist = await Coupon.findOne({ normalizedCode })
+    const isCouponExist = await Coupon.findOne({ code : normalizedCode })
 
     if(isCouponExist) {
         throw new ApiError(400, 'Coupon code already exist')
@@ -157,15 +158,41 @@ const updateCoupon = asyncHandler(async (req, res) => {
 })
 
 const deleteCoupon = asyncHandler(async (req, res) => {
-    // todo
+    const { id } = req.params;
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid coupon ID')
+    }
+
+    const isCouponExist = await Coupon.findById(id)
+
+    if(!isCouponExist) {
+        throw new ApiError(404, "Coupon does not exist")
+    }
+
+    const coupon = await Coupon.findByIdAndDelete(id)
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, null, 'Coupon deleted successfully'))
 })
 
 const getAllCoupons = asyncHandler(async (req, res) => {
-    // todo
+    const coupons = await Coupon.find()
+
+    if(coupons.length === 0) {
+        return res
+        .status(200)
+        .json(new ApiResponse(200, [], 'No coupon found'))
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, coupons, 'All coupons fetched successfully'))
 })
 
 const applyCoupon = asyncHandler(async (req, res) => {
-    // todo
+    // todo 
 })
 
 

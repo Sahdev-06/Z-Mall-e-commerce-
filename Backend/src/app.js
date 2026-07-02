@@ -26,6 +26,7 @@ import orderRouter from "./routes/order.routes.js"
 import paymentRouter from "./routes/payment.routes.js"
 import inventoryRouter from "./routes/inventoryLog.routes.js"
 import reviewRouter from "./routes/review.routes.js"
+import couponRouter from "./routes/coupon.routes.js"
 
 
 // routes declaration
@@ -39,5 +40,6 @@ app.use("/api/v1/order", orderRouter)
 app.use("/api/v1/payments", paymentRouter)
 app.use("/api/v1/inventory", inventoryRouter)
 app.use("/api/v1/reviews", reviewRouter)
+app.use("/api/v1/coupon", couponRouter)
 
 export { app }
