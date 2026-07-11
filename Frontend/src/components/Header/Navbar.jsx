@@ -8,7 +8,7 @@ function Navbar() {
     return (
         <>  
             <div className="flex gap-8 px-8 items-center h-24 bg-white shadow-sm">
-                <Logo />
+                <Logo theme={"text-slate-900 font-bold text-2xl"}/>
                 <div className="grow">
                     <SearchBar />
                 </div>
