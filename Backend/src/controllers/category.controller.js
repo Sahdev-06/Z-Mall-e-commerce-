@@ -14,7 +14,7 @@ const createCategory = asyncHandler(async (req, res) => {
     ) {
         throw new ApiError(400, "All fields are required ");
     }
-    
+
     const existingCategory = await Category.findOne({ name });
 
     if (existingCategory) {
@@ -48,8 +48,8 @@ const createCategory = asyncHandler(async (req, res) => {
 
     return res
         .status(201)
-        .json(new ApiResponse(201, category, "Category created successfully") );
-    
+        .json(new ApiResponse(201, category, "Category created successfully"));
+
 });
 
 const updateCategory = asyncHandler(async (req, res) => {
@@ -70,7 +70,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     if (slug !== undefined) {
         if (String(slug).trim() === "") throw new ApiError(400, "Slug cannot be empty");
         updateDetails.slug = slug;
-    }   
+    }
 
     if (description !== undefined) {
         if (String(description).trim() === "") throw new ApiError(400, "Description cannot be empty");
@@ -85,7 +85,7 @@ const updateCategory = asyncHandler(async (req, res) => {
         }
 
         updateDetails.image = response.url;
-    
+
     }
 
     const updatedCategory = await Category.findByIdAndUpdate(
@@ -100,12 +100,45 @@ const updateCategory = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, updatedCategory, "Category updated successfully") );
+        .json(new ApiResponse(200, updatedCategory, "Category updated successfully"));
 
+})
+
+const deleteCategory = asyncHandler(async (req, res) => {
+    const { id } = req.params
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid category ID")
+    }
+
+    const deletedCategory = await Category.findByIdAndDelete(id)
+
+    if (!deletedCategory) {
+        throw new ApiError(404, "Category not found")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, null, "Category deleted Successfully")
+        )
+})
+
+const getAllCategories = asyncHandler(async (req, res) => {
+    const categories = Category.find()
+
+    if(!categories || categories.length === 0) {
+        throw new ApiError(404, "No categories found")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, categories, "All categories fetched successfully"))
 })
 
 export {
     createCategory,
-    updateCategory
+    updateCategory,
+    deleteCategory,
+    getAllCategories
 }
-    

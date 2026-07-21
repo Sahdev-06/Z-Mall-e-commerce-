@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import {
     createCategory,
+    deleteCategory,
+    getAllCategories,
     updateCategory
 } from '../controllers/category.controller.js';
 
@@ -12,5 +14,7 @@ const router = Router();
 
 router.route("/create").post(verifyJWT, verifyAdmin, upload.single("image"), createCategory);
 router.route("/update/:id").patch(verifyJWT, verifyAdmin, upload.single("image"), updateCategory);
+router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteCategory)
+router.route("/all").get(verifyJWT, verifyAdmin, getAllCategories)
 
 export default router;
