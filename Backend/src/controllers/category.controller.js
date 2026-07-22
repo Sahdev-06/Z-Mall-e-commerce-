@@ -136,9 +136,28 @@ const getAllCategories = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, categories, "All categories fetched successfully"))
 })
 
+const getCategoryById = asyncHandler(async (req, res) => {
+    const { id } = req.params
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(401, "Invalid category id")
+    }
+
+    const category = await Category.findById(id)
+
+    if(!category) {
+        throw new ApiError(404, "Category does not exist")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, category, "Category fetched successfully"))
+})
+
 export {
     createCategory,
     updateCategory,
     deleteCategory,
-    getAllCategories
+    getAllCategories,
+    getCategoryById
 }

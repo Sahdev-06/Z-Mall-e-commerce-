@@ -3,6 +3,7 @@ import {
     createCategory,
     deleteCategory,
     getAllCategories,
+    getCategoryById,
     updateCategory
 } from '../controllers/category.controller.js';
 
@@ -16,5 +17,6 @@ router.route("/create").post(verifyJWT, verifyAdmin, upload.single("image"), cre
 router.route("/update/:id").patch(verifyJWT, verifyAdmin, upload.single("image"), updateCategory);
 router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteCategory)
 router.route("/all").get(verifyJWT, verifyAdmin, getAllCategories)
+router.route("/get/:id").get(verifyJWT, verifyAdmin, getCategoryById)
 
 export default router;
