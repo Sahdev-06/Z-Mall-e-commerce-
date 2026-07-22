@@ -125,7 +125,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
 })
 
 const getAllCategories = asyncHandler(async (req, res) => {
-    const categories = Category.find()
+    const categories = await Category.find()
 
     if(!categories || categories.length === 0) {
         throw new ApiError(404, "No categories found")
