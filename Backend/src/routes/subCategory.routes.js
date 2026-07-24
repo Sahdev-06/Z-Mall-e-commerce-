@@ -3,7 +3,8 @@ import {
     createSubCategory,
     updateSubCategory,
     deleteSubCategory,
-    getAllSubCategories
+    getAllSubCategories,
+    getSubCategoryById
 } from "../controllers/subCategory.controller.js";
 
 import { verifyAdmin } from "../middlewares/admin.middleware.js";
@@ -16,6 +17,7 @@ router.route("/create").post(verifyJWT, verifyAdmin, createSubCategory);
 router.route("/update/:id").patch(verifyJWT, verifyAdmin, updateSubCategory);
 router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteSubCategory);
 router.route("/all").get(getAllSubCategories);
+router.route("/get/:id").get(verifyJWT, verifyAdmin, getSubCategoryById);
 
 
 export default router;

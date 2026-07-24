@@ -114,11 +114,30 @@ const getAllSubCategories = asyncHandler(async (req, res) => {
     )
 })
 
+const getSubCategoryById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid subCategory ID")
+    }
+
+    const subCategory = await SubCategory.findById(id).populate("category")
+
+    if(!subCategory) {
+        throw new ApiError(404, "SubCategory does not exist")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, subCategory, "SubCategory fetched successfully"))
+})
+
 
 
 export {
     createSubCategory,
     updateSubCategory,
     deleteSubCategory,
-    getAllSubCategories
+    getAllSubCategories,
+    getSubCategoryById
 }
