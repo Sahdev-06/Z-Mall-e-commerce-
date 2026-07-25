@@ -1,7 +1,7 @@
 import CategoryTableRow from "./CategoryTableRow"
-import { categoryTable } from "../../../Dummy/dummyData"
 
-function CategoryTable() {
+
+function CategoryTable({ categories, modal, selectedCategory }) {
     return (
         <div className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
             <div className="max-h-[500px] overflow-y-auto">
@@ -32,14 +32,17 @@ function CategoryTable() {
                 </thead>
                 <tbody>
                     {
-                        categoryTable.map(({ id, image, name, slug, description, status }) => (
+                        categories.map(({ _id, image, name, slug, description, isActive }) => (
                             <CategoryTableRow
-                                key={id}
+                                key={_id}
+                                _id={_id}
                                 image={image}
                                 name={name}
                                 slug={slug}
                                 description={description}
-                                status={status}
+                                status={isActive}
+                                modal={modal}
+                                selectedCategory={selectedCategory}
                             />
                         ))
                     }
