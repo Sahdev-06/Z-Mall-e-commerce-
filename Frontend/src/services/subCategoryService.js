@@ -16,8 +16,8 @@ const createSubCategory = async (data) => {
     return response.data
 }
 
-const updateSubCategory = async (id) => {
-    const response = await axiosInstance.update(`/subCategory/update/${id}`)
+const updateSubCategory = async (id, data) => {
+    const response = await axiosInstance.patch(`/subCategory/update/${id}`, data)
     return response.data
 }
 

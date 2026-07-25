@@ -1,6 +1,21 @@
 import { SquarePen, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-function SubCategoryTableRow({ name, slug, category, status}) {
+function SubCategoryTableRow({ _id, name, slug, category, status, modal, selectedSubCategory }) {
+    const navigate = useNavigate()
+
+    function handleNavigate() {
+        navigate(`/admin/sub-category/edit/${_id}`)
+    }
+
+    function handleDelete() {
+        selectedSubCategory({
+            _id,
+            name
+        })
+        modal(true)
+    }
+
     return (
         <>
             <tr>
@@ -23,15 +38,21 @@ function SubCategoryTableRow({ name, slug, category, status}) {
                 <td className="px-6 py-4">
                     <span className="inline-flex items-center rounded-full bg-green-100
                                     text-green-700 px-3 py-1.5 text-xs font-medium">
-                        {status}
+                        {status ? "Active" : "Inactive"}
                     </span>
                 </td>
                 <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                        <button className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition">
+                        <button 
+                            className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition"
+                            onClick={handleNavigate}
+                        >
                             <SquarePen className="w-4 h-4"/>
                         </button>
-                        <button className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition">
+                        <button 
+                            className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition"
+                            onClick={handleDelete}
+                        >
                             <Trash2 className="w-4 h-4"/>
                         </button>
                     </div>

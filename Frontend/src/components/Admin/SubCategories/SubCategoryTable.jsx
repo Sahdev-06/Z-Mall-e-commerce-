@@ -1,7 +1,6 @@
-import { subCategoryTable } from "../../../Dummy/dummyData"
 import SubCategoryTableRow from "./SubCategoryTableRow"
 
-function SubCategoryTable() {
+function SubCategoryTable({ subCategories, modal, selectedSubCategory }) {
     return (
         <div className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
             <div className="max-h-[500px] overflow-y-auto">
@@ -28,13 +27,16 @@ function SubCategoryTable() {
                 </thead>
                 <tbody>
                     {
-                        subCategoryTable.map(({ id, name, slug, category, status }) => (
+                        subCategories.map(({ _id, name, slug, category , isActive }) => (
                             <SubCategoryTableRow
-                                key={id}
+                                key={_id}
+                                _id={_id}
                                 name={name}
                                 slug={slug}
-                                category={category}
-                                status={status}
+                                category={category?.name}
+                                status={isActive}
+                                modal={modal}
+                                selectedSubCategory={selectedSubCategory}
                             />
                         ))
                     }
