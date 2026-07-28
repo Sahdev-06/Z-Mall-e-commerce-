@@ -1,7 +1,7 @@
 import ProductTableRow from "./ProductTableRow";
 import { productTable } from "../../../Dummy/dummyData";
 
-function ProductTable() {
+function ProductTable({ products, modal, selectedProduct }) {
     return (
         <div className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
             <div className="max-h-[500px] overflow-y-auto">
@@ -36,15 +36,18 @@ function ProductTable() {
                 </thead>
                 <tbody>
                     {
-                        productTable.map(({ id, image, name, category, price, stock, status }) => (
+                        products.map(({ _id, images, name, category, price, stock, isActive }) => (
                             <ProductTableRow
-                                key={id}
-                                image={image}
+                                key={_id}
+                                _id={_id}
+                                image={images[0]}
                                 name={name}
-                                category={category}
+                                category={category?.name}
                                 price={price}
                                 stock={stock}
-                                status={status}
+                                status={isActive}
+                                modal={modal}
+                                selectedProduct={selectedProduct}
                             />
                         ))
                     }
