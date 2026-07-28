@@ -44,6 +44,10 @@ const productSchema = new mongoose.Schema(
             type : Boolean,
             default : true
             // Controls whether product is visible to users or hidden
+        },
+        isActive : {
+            type : Boolean,
+            default : false
         }
     }, 
     { timestamps : true }
