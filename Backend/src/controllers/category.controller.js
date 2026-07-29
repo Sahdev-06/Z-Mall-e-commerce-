@@ -5,7 +5,7 @@ import { uploadOnCloudinary } from '../services/cloudinary.js';
 import { Category } from '../models/category.model.js';
 import mongoose from 'mongoose';
 
-
+// Admin
 const createCategory = asyncHandler(async (req, res) => {
     const { name, slug, description, image } = req.body;
 
@@ -154,10 +154,45 @@ const getCategoryById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, category, "Category fetched successfully"))
 })
 
+// public 
+const getAllCategoriesForPublic = asyncHandler(async (req, res) => {
+    const categories = await Category.find({
+        isActive : true
+    })
+
+    if(!categories || categories.length === 0) {
+        throw new ApiError(404, "No categories found")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, categories, "All categories fetched successfully"))
+})
+
+const getCategoryByIdForPublic = asyncHandler(async (req, res) => {
+    const { id } = req.params
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(401, "Invalid category id")
+    }
+
+    const category = await Category.findById(id)
+
+    if(!category) {
+        throw new ApiError(404, "Category does not exist")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, category, "Category fetched successfully"))
+})
+
 export {
     createCategory,
     updateCategory,
     deleteCategory,
     getAllCategories,
+    getAllCategoriesForPublic,
+    getCategoryByIdForPublic,
     getCategoryById
 }

@@ -3,7 +3,9 @@ import {
     createCategory,
     deleteCategory,
     getAllCategories,
+    getAllCategoriesForPublic,
     getCategoryById,
+    getCategoryByIdForPublic,
     updateCategory
 } from '../controllers/category.controller.js';
 
@@ -13,10 +15,15 @@ import { upload } from '../middlewares/multer.middleware.js';
 
 const router = Router();
 
+// admin route
 router.route("/create").post(verifyJWT, verifyAdmin, upload.single("image"), createCategory);
 router.route("/update/:id").patch(verifyJWT, verifyAdmin, upload.single("image"), updateCategory);
-router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteCategory)
-router.route("/all").get(verifyJWT, verifyAdmin, getAllCategories)
-router.route("/get/:id").get(verifyJWT, verifyAdmin, getCategoryById)
+router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteCategory);
+router.route("/all").get(verifyJWT, verifyAdmin, getAllCategories);
+router.route("/get/:id").get(verifyJWT, verifyAdmin, getCategoryById);
+
+// public route
+router.route("/get-all").get(getAllCategoriesForPublic);
+router.route("/get-one/:id").get(getCategoryByIdForPublic);
 
 export default router;
