@@ -31,6 +31,11 @@ const deleteProduct = async (id) => {
     return response.data
 }
 
+const featuredProduct = async (id) => {
+    const response = await axiosInstance.patch(`/product/${id}/featured`)
+    return response.data
+}
+
 // public api
 const getAllProducts = async () => {
     const response = await axiosInstance.get("/product/get-all-product")
@@ -39,6 +44,7 @@ const getAllProducts = async () => {
 
 const getProductById = async (id) => {
     const response = await axiosInstance.get(`/product/get-product/${id}`)
+    return response.data
 }
 
 
@@ -51,4 +57,5 @@ export {
     deleteProduct,
     getAllProducts,
     getProductById,
+    featuredProduct
 }
