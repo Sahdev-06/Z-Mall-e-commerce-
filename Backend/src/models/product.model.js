@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema(
             default : true
             // Controls whether product is visible to users or hidden
         },
-        isActive : {
+        isFeatured : {
             type : Boolean,
             default : false
         }
