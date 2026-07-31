@@ -5,7 +5,7 @@ function BottomSection() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4
                             px-6 lg:px-10 py-6 border-t border-black">
                 <div>
-                    <p text-gray-900 text-sm>
+                    <p className="text-gray-400 text-sm">
                         &copy; 2026 ShpeEase. All rights reserved
                     </p>
                 </div>
