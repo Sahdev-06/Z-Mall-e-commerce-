@@ -47,6 +47,26 @@ const getProductById = async (id) => {
     return response.data
 }
 
+const getFeaturedProducts = async (page, limit) => {
+    const response = await axiosInstance.get("/product/featured", {
+        params : {
+            page,
+            limit
+        }
+    })
+    return response.data
+}
+
+const getTopDealsProducts = async (page, limit) => {
+    const response = await axiosInstance.get("/product/top-deals")
+    return response.data
+}
+
+const getNewArrivalProducts = async (page, limit) => {
+    const response = await axiosInstance.get("/product/new-arrivals")
+    return response.data
+}
+
 
 export {
     createProduct,
@@ -57,5 +77,8 @@ export {
     deleteProduct,
     getAllProducts,
     getProductById,
-    featuredProduct
+    featuredProduct,
+    getFeaturedProducts,
+    getTopDealsProducts,
+    getNewArrivalProducts
 }
