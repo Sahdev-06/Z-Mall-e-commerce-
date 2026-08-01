@@ -1,8 +1,9 @@
 import axiosInstance from "../api/axios.js"
 
+// admin API
 const createCategory = async (categoryData) => {
     const response = await axiosInstance.post("/category/create", categoryData)
-    console.log(response.data)
+    return response.data
 }
 
 const getAllCategories = async () => {
@@ -25,11 +26,23 @@ const deleteCategory = async (id) => {
     return response.data
 }
 
+// public API
+const getAllCategoriesForPublic = async () => {
+    const response = await axiosInstance.get("/category/get-all")
+    return response.data
+}
+
+const getCategoryByIdForPublic = async (id) => {
+    const response = await axiosInstance.get(`/category/get-one/${id}`)
+    return response.data
+}
 
 export {
     createCategory,
     getAllCategories,
     getCategoryById,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    getAllCategoriesForPublic,
+    getCategoryByIdForPublic
 }
