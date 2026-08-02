@@ -12,8 +12,20 @@ const getCurrentUser = async () => {
     return response.data
 }
 
+const registerUser = async (userData) => {
+    const response = await axiosInstance.post("/users/register", userData)
+    return response.data
+}
+
+const loginUser = async (userData) => {
+    const response = await axiosInstance.post("/users/login", userData)
+    return response.data
+}
+
 
 export { 
     loginAdmin,
-    getCurrentUser
+    getCurrentUser,
+    registerUser,
+    loginUser
 }
