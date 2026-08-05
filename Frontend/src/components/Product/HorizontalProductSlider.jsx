@@ -12,6 +12,7 @@ function HorizontalProductSlider({ products }) {
                         >
                             <ProductCard
                                 // key={_id}
+                                _id={_id}
                                 name={name}
                                 discount={discount}
                                 price={price}
