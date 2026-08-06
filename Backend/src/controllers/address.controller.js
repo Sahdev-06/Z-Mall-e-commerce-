@@ -132,7 +132,9 @@ const getAllAddresses = asyncHandler(async (req, res) => {
     const addresses = await Address.find({ user: userId });
 
     if(!addresses || addresses.length === 0) {
-        throw new ApiError(404, "No addresses found for this user");
+        return res
+        .status(200)
+        .json(new ApiResponse(200, [], "No address present for this user"))
     }
 
     return res
