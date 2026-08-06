@@ -203,8 +203,8 @@ const setDefaultAddress = asyncHandler(async (req, res) => {
     address.isDefault = true;
     await address.save();
 
-    return 
-    res.status(200)
+    return res
+    .status(200)
     .json(
         new ApiResponse(
             200,
