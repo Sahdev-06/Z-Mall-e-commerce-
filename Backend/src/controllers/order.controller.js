@@ -28,9 +28,13 @@ const createOrder = asyncHandler(async (req, res) => {
     }
 
     let itemsTotalPrice = 0
+    let discountAmount = 0;
 
     for(const item of cart.items) {
         itemsTotalPrice += item.product.price * item.quantity
+        discountAmount += (item.product.price * (item.product.discount / 100)) * item.quantity
+        console.log("price", item.product.price)
+        console.log("discount", item.product.discount)
     }
 
     const cartItems = []
@@ -67,10 +71,8 @@ const createOrder = asyncHandler(async (req, res) => {
     }
 
     let shippingFee = 0;
-    let discountAmount = 0;
 
     const finalPrice = (itemsTotalPrice + shippingFee) - discountAmount
-
     for(const item of cart.items) {
         const currentStock = item.product.stock
         const itemQty = item.quantity
@@ -84,6 +86,7 @@ const createOrder = asyncHandler(async (req, res) => {
         orderItems : cartItems, 
         shippingAddress : selectedAddress, 
         itemsPrice : itemsTotalPrice,  
+        discountAmount : discountAmount.toFixed(2),
         totalAmount : finalPrice,
         paymentMethod,
     })
