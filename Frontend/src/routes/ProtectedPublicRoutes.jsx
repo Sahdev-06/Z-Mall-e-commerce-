@@ -1,34 +1,23 @@
 import { useState, useEffect } from "react"
-import { Navigate, Outlet } from "react-router-dom"
-import { getCurrentUser } from "../services/authService";
+import { Navigate, Outlet, useLocation } from "react-router-dom"
 import Loading from "../components/Common/Loading";
+import { useAuth } from "../context/AuthContext";
 
 function ProtectedPublicRoutes() {
+    const location = useLocation()
 
-    const [user, setUser] = useState(null)
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        const fetchCurrentUser = async () => {
-            try {
-                const response = await getCurrentUser()
-                setUser(response)
-            } catch (error) {
-                setUser(null)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchCurrentUser();
-    }, [])
+    const { user, loading } = useAuth();
 
     if(loading) {
         return <Loading />
     }
 
     if(!user) {
-        return <Navigate to="/login" replace/>
+        return <Navigate 
+                    to="/login"
+                    state={{ from : location }}
+                    replace
+                />
     }
 
     return (
