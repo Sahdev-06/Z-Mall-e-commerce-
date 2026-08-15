@@ -47,9 +47,12 @@ const getProductById = async (id) => {
     return response.data
 }
 
-const getFeaturedProducts = async (page, limit) => {
-    const response = await axiosInstance.get("/product/featured", {
+const getProducts = async (search, categories, sort, page, limit) => {
+    const response = await axiosInstance.get("/product/get-products", {
         params : {
+            search,
+            category : categories?.join(","),
+            sort,
             page,
             limit
         }
@@ -57,13 +60,36 @@ const getFeaturedProducts = async (page, limit) => {
     return response.data
 }
 
-const getTopDealsProducts = async (page, limit) => {
-    const response = await axiosInstance.get("/product/top-deals")
+const getFeaturedProducts = async (page, limit, sort) => {
+    const response = await axiosInstance.get("/product/featured", {
+        params : {
+            page,
+            limit,
+            sort
+        }
+    })
     return response.data
 }
 
-const getNewArrivalProducts = async (page, limit) => {
-    const response = await axiosInstance.get("/product/new-arrivals")
+const getTopDealsProducts = async (page, limit, sort) => {
+    const response = await axiosInstance.get("/product/top-deals", {
+        params : {
+            page,
+            limit,
+            sort
+        }
+    })
+    return response.data
+}
+
+const getNewArrivalProducts = async (page, limit, sort) => {
+    const response = await axiosInstance.get("/product/new-arrivals", {
+        params : {
+            page,
+            limit,
+            sort
+        }
+    })
     return response.data
 }
 
@@ -77,6 +103,7 @@ export {
     deleteProduct,
     getAllProducts,
     getProductById,
+    getProducts,
     featuredProduct,
     getFeaturedProducts,
     getTopDealsProducts,
