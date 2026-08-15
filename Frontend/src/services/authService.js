@@ -22,10 +22,16 @@ const loginUser = async (userData) => {
     return response.data
 }
 
+const logoutUser = async () => {
+    const response = await axiosInstance.post("/users/logout")
+    return response.data
+}
+
 
 export { 
     loginAdmin,
     getCurrentUser,
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser
 }
