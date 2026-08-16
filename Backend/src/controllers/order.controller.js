@@ -33,8 +33,6 @@ const createOrder = asyncHandler(async (req, res) => {
     for(const item of cart.items) {
         itemsTotalPrice += item.product.price * item.quantity
         discountAmount += (item.product.price * (item.product.discount / 100)) * item.quantity
-        console.log("price", item.product.price)
-        console.log("discount", item.product.discount)
     }
 
     const cartItems = []

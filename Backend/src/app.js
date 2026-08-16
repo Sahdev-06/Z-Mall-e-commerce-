@@ -29,6 +29,8 @@ import reviewRouter from "./routes/review.routes.js"
 import couponRouter from "./routes/coupon.routes.js"
 import bannerRouter from "./routes/banner.routes.js"
 
+import errorHandler from "./middlewares/error.middleware.js"
+
 
 // routes declaration
 app.use("/api/v1/users", userRouter)
@@ -43,5 +45,7 @@ app.use("/api/v1/inventory", inventoryRouter)
 app.use("/api/v1/reviews", reviewRouter)
 app.use("/api/v1/coupon", couponRouter)
 app.use("/api/v1/banner", bannerRouter)
+
+app.use(errorHandler)
 
 export { app }
