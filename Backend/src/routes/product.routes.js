@@ -8,6 +8,7 @@ import {
     getNewArrivalProducts, 
     getProductById, 
     getProductByIdForAdmin, 
+    getProducts, 
     getTopDealsProducts, 
     toggleFeaturedProduct, 
     updateProduct, 
@@ -30,6 +31,7 @@ router.route("/:id/featured").patch(verifyJWT, verifyAdmin, toggleFeaturedProduc
 
 // public routes
 router.route("/get-all-product").get(getAllProduct)
+router.route("/get-products").get(getProducts)
 router.route("/get-product/:id").get(getProductById)
 router.route("/featured").get(getFeaturedProducts)
 router.route("/top-deals").get(getTopDealsProducts)

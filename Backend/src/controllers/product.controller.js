@@ -299,6 +299,90 @@ const getAllProduct = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, product, "All Products fetched successfully"))
 })
 
+// searching products 
+const getProducts = asyncHandler(async (req, res) => {
+    const { search, category, sort, page = 1, limit = 10 } = req.query;
+
+    const pageNumber = Number(page)
+    const limitNumber = Number(limit)
+
+    const skip = ( pageNumber - 1 ) * limitNumber
+
+    const filter = {
+        isActive : true,
+        stock : { $gt : 0 }
+    }
+
+    // search products based on search query
+    if(search && search.trim() !== "") {
+        filter.$or = [
+            { name : { $regex:search.trim(), $options: "i"} },
+            { description : { $regex:search.trim(), $options: "i"} }
+        ]
+    }
+
+    // search based on category
+    if(category) {
+        const categoryIds = category.split(",")
+
+        filter.category = {
+            $in : categoryIds
+        }
+    }
+
+    // sort by price
+    const sortOption = {}
+    if(sort === "price-low-high") {
+        sortOption.price = 1
+    } else if (sort === "price-high-low") {
+        sortOption.price = -1
+    }
+
+    const products = await Product.find(filter)
+        .populate("category")
+        .populate("subCategory")
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limitNumber)
+
+    if(!products || products.length === 0) {
+        return res
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            {
+                products : [],
+                pagination : {
+                    currentPage : pageNumber,
+                    totalPages : 0,
+                    totalProducts : 0,
+                    limit
+                }
+            },
+            "No products available"
+        ))
+    }
+
+    const totalProducts = await Product.countDocuments(filter)
+    const totalPages = Math.ceil(totalProducts / limitNumber)
+
+    return res
+    .status(200)
+    .json(new ApiResponse(
+        200, 
+        {
+            products,
+            pagination : {
+                currentPage : pageNumber,
+                totalPages,
+                totalProducts,
+                limit : limitNumber
+            }
+        }, 
+        "Products fetched successfully"
+    ))
+})
+
 const getProductById = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -320,6 +404,7 @@ const getProductById = asyncHandler(async (req, res) => {
 const getFeaturedProducts = asyncHandler(async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
+    const sort = req.query.sort
 
     const skip = (page - 1) * limit
 
@@ -328,9 +413,19 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
         isFeatured : true
     }
 
+    // sort by price
+    const sortOption = {}
+    if(sort === "price-low-high") {
+        sortOption.price = 1
+    } else if (sort === "price-high-low") {
+        sortOption.price = -1
+    }
+
+
     const featuredProducts = await Product.find(filter)
     .populate("category")
     .populate("subCategory")
+    .sort(sortOption)
     .skip(skip)
     .limit(limit)
 
@@ -342,10 +437,12 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
                 200,
                 {
                     products : [],
-                    page,
-                    limit,
-                    totalFeaturedProducts : 0,
-                    totalPages : 0
+                    pagination: {
+                        currentPage: page,
+                        totalPages: 0,
+                        totalProducts: 0,
+                        limit
+                    }
                 },
                 "No featured products available"
             )
@@ -363,10 +460,12 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
             200,
             {
                 products : featuredProducts,
-                page,
-                limit,
-                totalFeaturedProducts,
-                totalPages
+                pagination : {
+                    currentPage : page,
+                    totalPages,
+                    totalProducts : totalFeaturedProducts,
+                    limit
+                }
             },
             "Featured products fetched successfully"
         )
@@ -376,6 +475,7 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
 const getTopDealsProducts = asyncHandler(async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
+    const sort = req.query.sort
 
     const skip = (page - 1) * limit;
 
@@ -384,11 +484,19 @@ const getTopDealsProducts = asyncHandler(async (req, res) => {
         discount : { $gt : 0 }
     }
 
-    const topDealsProducts = await Product.find(filter)
-    .sort({
+    // sort by price
+    const sortOption = {
         discount : -1,
         createdAt : -1
-    })
+    }
+    if(sort === "price-low-high") {
+        sortOption.price = 1
+    } else if (sort === "price-high-low") {
+        sortOption.price = -1
+    }
+
+    const topDealsProducts = await Product.find(filter)
+    .sort(sortOption)
     .populate("category")
     .populate("subCategory")
     .skip(skip)
@@ -402,10 +510,12 @@ const getTopDealsProducts = asyncHandler(async (req, res) => {
                 200,
                 {
                     products : [],
-                    page,
-                    limit,
-                    totalTopDealsProducts : 0,
-                    totalPages : 0
+                    pagination: {
+                        currentPage: page,
+                        limit,
+                        totalProducts: 0,
+                        totalPages: 0
+                    }
                 },
                 "No top deals products available"
             )
@@ -423,10 +533,12 @@ const getTopDealsProducts = asyncHandler(async (req, res) => {
             200,
             {
                 products : topDealsProducts,
-                page,
-                limit,
-                totalTopDealsProducts,
-                totalPages
+                pagination: {
+                    currentPage: page,
+                    limit,
+                    totalProducts: totalTopDealsProducts,
+                    totalPages
+                }
             },
             "Top deals products fetched successfully"
         )
@@ -436,6 +548,7 @@ const getTopDealsProducts = asyncHandler(async (req, res) => {
 const getNewArrivalProducts = asyncHandler(async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
+    const sort = req.query.sort
 
     const skip = (page - 1) * limit;
 
@@ -443,10 +556,18 @@ const getNewArrivalProducts = asyncHandler(async (req, res) => {
         isActive : true,
     }
 
-    const newArrivalProducts = await Product.find(filter)
-    .sort({
+    // sort by price
+    const sortOption = {
         createdAt : -1
-    })
+    }
+    if(sort === "price-low-high") {
+        sortOption.price = 1
+    } else if (sort === "price-high-low") {
+        sortOption.price = -1
+    }
+
+    const newArrivalProducts = await Product.find(filter)
+    .sort(sortOption)
     .populate("category")
     .populate("subCategory")
     .skip(skip)
@@ -460,10 +581,12 @@ const getNewArrivalProducts = asyncHandler(async (req, res) => {
                 200,
                 {
                     products : [],
-                    page,
-                    limit,
-                    totalTopDealsProducts : 0,
-                    totalPages : 0
+                    pagination: {
+                        currentPage: page,
+                        limit,
+                        totalProducts: 0,
+                        totalPages: 0
+                    }
                 },
                 "No new arrival products available"
             )
@@ -481,10 +604,12 @@ const getNewArrivalProducts = asyncHandler(async (req, res) => {
             200,
             {
                 products : newArrivalProducts,
-                page,
-                limit,
-                totalNewArrivalProducts,
-                totalPages
+                pagination: {
+                    currentPage: page,
+                    limit,
+                    totalProducts: totalNewArrivalProducts,
+                    totalPages
+                }
             },
             "New arrival products fetched successfully"
         )
@@ -500,6 +625,7 @@ export {
     getProductByIdForAdmin,
     toggleFeaturedProduct,
     getAllProduct,
+    getProducts,
     getProductById,
     getFeaturedProducts,
     getTopDealsProducts,
