@@ -27,11 +27,22 @@ const logoutUser = async () => {
     return response.data
 }
 
+const changeCurrentPassword = async (data) => {
+    const response = await axiosInstance.post("/users/change-password", data)
+    return response.data
+}
+
+const updateAccount = async (data) => {
+    const response = await axiosInstance.post("/users/update-account", data)
+    return response.data
+}
 
 export { 
     loginAdmin,
     getCurrentUser,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    changeCurrentPassword,
+    updateAccount
 }
