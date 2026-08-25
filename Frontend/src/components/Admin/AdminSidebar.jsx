@@ -42,7 +42,7 @@ function AdminSidebar() {
 
     return (
         <>
-            <div className="w-72 bg-slate-900 text-white min-h-screen flex flex-col">
+            <div className="w-72 bg-slate-900 text-white h-screen sticky top-0 flex flex-col">
 
                 {/* Logo */}
                 <div className="p-6 border-b border-slate-700">
@@ -52,7 +52,7 @@ function AdminSidebar() {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex-1 px-4 py-6 overflow-y-auto">
+                <div className="flex-1 px-4 py-6 overflow-y-auto custom-scrollbar">
 
                     {
                         menuSections.map(({ title, items }) => (
