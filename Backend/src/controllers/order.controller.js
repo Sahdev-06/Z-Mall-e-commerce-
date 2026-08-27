@@ -120,10 +120,106 @@ const createOrder = asyncHandler(async (req, res) => {
 
 })
 
+const createBuyNowOrder = asyncHandler(async (req, res) => {
+    const { _id : userId } = req.user
+    const { addressId, paymentMethod, productId, quantity } = req.body
+
+
+    if(!addressId || !mongoose.Types.ObjectId.isValid(addressId)) {
+        throw new ApiError(404, 'Invalid address ID')
+    }
+
+    if(String(paymentMethod) === "") {
+        throw new ApiError(400, 'Payment method required')
+    }
+
+    if(!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+        throw new ApiError(404, 'Invalid product ID')
+    }
+
+    if(quantity <= 0) {
+        throw new ApiError(400, "Quantity must be at least 1")
+    }
+
+    const product = await Product.findById(productId)
+
+    if(!product) {
+        throw new ApiError(404, "This product does not exist")
+    }
+
+    let itemPrice = product.price * quantity
+    let itemDiscount = (product.price * (product.discount / 100)) * quantity
+
+    const item = [{
+        product : product._id,
+        quantity : quantity,
+        price : product.price,
+        productName : product.name,
+        productImage : product.images[0]
+    }]
+
+    const address = await Address.findById(addressId)
+
+    if(!address || String(userId) !== String(address.user)) {
+        throw new ApiError(400, 'Invalid address ID')
+    }
+
+    const { fullName, phoneNumber, street, city, state, postalCode, landmark, addressType } = address
+
+    const selectedAddress = {
+        fullName,
+        phoneNumber,
+        street,
+        city,
+        state,
+        postalCode,
+        landmark,
+        addressType
+    }
+
+    let shippingFee = 0;
+
+    const finalPrice = (itemPrice + shippingFee) - itemDiscount
+
+    if(quantity > product.stock) {
+        throw new ApiError(400, 'Item quantity exceeds available stock')
+    }
+
+    const order = await Order.create({
+        user : userId,
+        orderItems : item,
+        shippingAddress : selectedAddress,
+        itemsPrice : itemPrice,
+        discountAmount : itemDiscount.toFixed(2),
+        totalAmount : finalPrice,
+        paymentMethod
+    })
+
+    if(!order) {
+        throw new ApiError(500, "Order creation failed")
+    }
+
+
+    // create inventory
+    product.stock = product.stock - quantity
+    await product.save()
+
+    const changedStock = quantity;
+    const type = 'OUT';
+    const reason = 'Order placed';
+
+    await createInventoryLog(productId, changedStock, type, reason)
+
+
+    return res
+    .status(201)
+    .json(new ApiResponse(201, order, "Order created successfully"))
+})
+
 const getMyOrders = asyncHandler(async (req, res) => {
     const { _id : userId } = req.user
 
-    const orders = await Order.find({ user : userId })
+    const orders = await Order.find({ user : userId }).sort({ createdAt : -1 })
 
     if(!orders || orders.length === 0) {
         return res
@@ -219,7 +315,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
 })
 
 const getAllOrders = asyncHandler(async (req, res) => {
-    const orders = await Order.find()
+    const orders = await Order.find().sort({ createdAt : -1 })
 
     if(!orders || orders.length === 0) {
         return res
@@ -289,6 +385,7 @@ const getOrderByIdForAdmin = asyncHandler(async (req, res) => {
 
 export {
     createOrder,
+    createBuyNowOrder,
     getMyOrders,
     getOrderById,
     cancelOrder,
