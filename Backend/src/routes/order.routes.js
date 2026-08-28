@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { 
     cancelOrder, 
     createOrder, 
+    createBuyNowOrder,
     getAllOrders, 
     getMyOrders, 
     getOrderById, 
@@ -16,6 +17,7 @@ const router = Router();
 
 
 router.route("/create").post(verifyJWT, createOrder);
+router.route("/buy-now").post(verifyJWT, createBuyNowOrder)
 router.route("/get").get(verifyJWT, getMyOrders);
 router.route("/get/:id").get(verifyJWT, getOrderById);
 router.route("/cancel/:id").get(verifyJWT, cancelOrder);
