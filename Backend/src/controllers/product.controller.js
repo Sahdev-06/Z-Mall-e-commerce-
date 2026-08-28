@@ -485,20 +485,25 @@ const getTopDealsProducts = asyncHandler(async (req, res) => {
     }
 
     // sort by price
-    const sortOption = {
+    let sortOption = {
         discount : -1,
         createdAt : -1
     }
+
     if(sort === "price-low-high") {
-        sortOption.price = 1
+        sortOption = {
+            price: 1
+        }
     } else if (sort === "price-high-low") {
-        sortOption.price = -1
+        sortOption = {
+            price: -1
+        }
     }
 
     const topDealsProducts = await Product.find(filter)
-    .sort(sortOption)
     .populate("category")
     .populate("subCategory")
+    .sort(sortOption)
     .skip(skip)
     .limit(limit)
 
@@ -557,19 +562,23 @@ const getNewArrivalProducts = asyncHandler(async (req, res) => {
     }
 
     // sort by price
-    const sortOption = {
+    let sortOption = {
         createdAt : -1
     }
     if(sort === "price-low-high") {
-        sortOption.price = 1
+        sortOption = {
+            price: 1
+        }
     } else if (sort === "price-high-low") {
-        sortOption.price = -1
+        sortOption = {
+            price: -1
+        }
     }
 
     const newArrivalProducts = await Product.find(filter)
-    .sort(sortOption)
     .populate("category")
     .populate("subCategory")
+    .sort(sortOption)
     .skip(skip)
     .limit(limit)
 
