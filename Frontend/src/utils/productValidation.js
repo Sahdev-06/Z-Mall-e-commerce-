@@ -1,4 +1,4 @@
-const validateProduct = (formData, previewImages, mode = "add") => {
+const validateProduct = (formData) => {
     const errors = {}
 
     // Name
@@ -29,12 +29,43 @@ const validateProduct = (formData, previewImages, mode = "add") => {
     }
 
     // Images
-    if (mode === "add" && previewImages.length === 0) {
-        errors.images = "Please upload at least one image.";
+    if(formData.images.length === 0) {
+        errors.images = "Upload at least one image"
+    }
+
+    return errors
+}
+
+const validateProductUpdate = (formData) => {
+    const errors = {}
+
+     // Name
+    if (!formData.name.trim()) {
+        errors.name = "Product name is required"
+    } else if (formData.name.trim().length < 3) {
+        errors.name = "Product name must be at least 3 characters"
+    }
+
+    // Description
+    if (!formData.description.trim()) {
+        errors.description = "Product description is required"
+    }
+
+    // Price
+    if (!formData.price) {
+        errors.price = "Price is required"
+    }
+
+    // Images
+    if(formData.images.length === 0) {
+        errors.images = "Upload at least one image"
     }
 
     return errors
 }
 
 
-export default validateProduct
+export {
+    validateProduct,
+    validateProductUpdate
+}
