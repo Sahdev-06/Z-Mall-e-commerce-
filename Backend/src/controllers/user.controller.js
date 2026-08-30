@@ -3,6 +3,7 @@ import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -255,6 +256,39 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Account details updated successfully") )
 })
 
+// controllers access by admin
+const getAllUsers = asyncHandler(async (req, res) => {
+    const users = await User.find({ role : 'customer' })
+
+    if(!users) {
+        return res
+        .status(200)
+        .json(new ApiResponse(200, [], "No users present"))
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, users, "All users fetched successfully"))
+})
+
+const getUserById = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+
+    if(!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+        throw new ApiError(400, "Invalid user Id")
+    }
+
+    const user = await User.findById(userId) 
+
+    if(!user) {
+        throw new ApiError(404, "User does not exist")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User fetched successfully"))
+})
+
 export {
     registerUser,
     loginUser,
@@ -262,5 +296,7 @@ export {
     refreshAccessToken,
     changeCurrentPassword,
     getCurrentUser,
-    updateAccountDetails
+    updateAccountDetails,
+    getAllUsers,
+    getUserById
 }

@@ -5,9 +5,12 @@ import {
     loginUser, logoutUser, 
     refreshAccessToken, 
     registerUser, 
-    updateAccountDetails
+    updateAccountDetails,
+    getAllUsers,
+    getUserById
 } from "../controllers/user.controller.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
+import { verifyAdmin } from "../middlewares/admin.middleware.js"
 
 const router = Router()
 
@@ -22,6 +25,10 @@ router.route("/refresh-token").post(refreshAccessToken)
 router.route("/change-password").post(verifyJWT, changeCurrentPassword)
 router.route("/current-user").get(verifyJWT, getCurrentUser)
 router.route("/update-account").post(verifyJWT, updateAccountDetails)
+
+// access by admin
+router.route("/get-users").get(verifyJWT, verifyAdmin, getAllUsers)
+router.route("/get-user/:userId").get(verifyJWT, verifyAdmin, getUserById)
 
 
 export default router
