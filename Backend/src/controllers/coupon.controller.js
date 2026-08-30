@@ -60,6 +60,24 @@ const createCoupon = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, coupon, 'Coupon created successfully'))
 })
 
+const getCouponById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, 'Invalid coupon ID')
+    }
+
+    const coupon = await Coupon.findById(id)
+
+    if(!coupon) {
+        throw new ApiError(404, "Coupon does not exist")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, coupon, "Coupon fetched successfully"))
+})
+
 const updateCoupon = asyncHandler(async (req, res) => {
     const { discount, discountType, minimumOrderAmount, expiryDate, isActive } = req.body;
     const { id } = req.params;
@@ -261,6 +279,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
 
 export {
     createCoupon,
+    getCouponById,
     updateCoupon,
     deleteCoupon,
     getAllCoupons,

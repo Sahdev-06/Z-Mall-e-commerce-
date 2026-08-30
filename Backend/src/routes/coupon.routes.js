@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { 
     createCoupon,
+    getCouponById,
     updateCoupon,
     deleteCoupon,
     getAllCoupons,
@@ -12,6 +13,7 @@ import { verifyAdmin } from '../middlewares/admin.middleware.js'
 const router = Router()
 
 router.route("/create").post(verifyJWT, verifyAdmin, createCoupon)
+router.route("/get/:id").get(verifyJWT, verifyAdmin, getCouponById)
 router.route("/update/:id").patch(verifyJWT, verifyAdmin, updateCoupon)
 router.route("/delete/:id").delete(verifyJWT, verifyAdmin, deleteCoupon)
 router.route("/all").get(verifyJWT, verifyAdmin, getAllCoupons)
