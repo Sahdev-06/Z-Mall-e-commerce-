@@ -25,7 +25,7 @@ const getAllCoupons = async () => {
     return response.data
 }
 
-const applyCoupon = async (couponData) => {
+const applyCouponCode = async (couponData) => {
     const response = await axiosInstance.post("/coupon/apply", couponData)
     return response.data
 }
@@ -37,5 +37,5 @@ export {
     updateCoupon,
     deleteCoupon,
     getAllCoupons,
-    applyCoupon
+    applyCouponCode
 }
