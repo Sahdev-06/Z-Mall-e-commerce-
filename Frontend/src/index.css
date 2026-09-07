@@ -3,4 +3,29 @@
 
 body {
     font-family: 'Poppins', sans-serif;
+    background-color: #f8fafc;
+}
+
+/* Thin Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #f97316;   /* Tailwind orange-500 */
+    border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #ea580c;   /* Tailwind orange-600 */
+}
+
+/* Firefox */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #f97316 transparent;
 }

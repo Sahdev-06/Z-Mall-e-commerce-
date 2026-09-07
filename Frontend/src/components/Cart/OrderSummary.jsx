@@ -7,6 +7,7 @@ import { useState } from "react";
 function OrderSummary({ btnText, navigateTo, state }) {
     const { orderSummary, handleCouponSubmit } = useCart();
     const { subtotal, total, discount, quantity, checkoutType } = useCheckout();
+    console.log("state : ", state)
 
     const [formData, setFormData] = useState({
         code : "",
@@ -92,7 +93,7 @@ function OrderSummary({ btnText, navigateTo, state }) {
                 </div>
 
                 {/* Coupon */}
-                <div className="mt-6 border-t border-gray-100 pt-6">
+                {state.checkoutType === "cart" && (<div className="mt-6 border-t border-gray-100 pt-6">
                     <label
                         htmlFor="coupon"
                         className="mb-2 block text-sm font-medium text-gray-900"
@@ -139,7 +140,7 @@ function OrderSummary({ btnText, navigateTo, state }) {
                             {error}
                         </p>
                     )}
-                </div>
+                </div>)}
 
                 {/* Total */}
                 <div className="mt-6 border-t border-gray-200 pt-5">
