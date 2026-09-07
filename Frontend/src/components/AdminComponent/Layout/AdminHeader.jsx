@@ -1,15 +1,47 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom"
+import { logoutUser } from "../../../services/authService";
+import { useAuth } from "../../../context/AuthContext";
 import {
-  Bell,
   Menu,
-  Search,
   ChevronDown,
   LogOut,
   User,
+  Circle,
 } from "lucide-react";
 
 const AdminHeader = ({ onMenuClick }) => {
+  const navigate = useNavigate()
+  const { user } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  // logout user
+  const handleLogout = async () => {
+    try {
+      await logoutUser()
+      navigate("/admin/login")
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <header
@@ -18,6 +50,7 @@ const AdminHeader = ({ onMenuClick }) => {
     >
       {/* Left */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
+        {/* Mobile Menu */}
         <button
           type="button"
           onClick={onMenuClick}
@@ -29,65 +62,61 @@ const AdminHeader = ({ onMenuClick }) => {
           <Menu size={22} strokeWidth={2} />
         </button>
 
-        {/* Search */}
-        <div className="hidden max-w-md flex-1 md:block">
-          <div className="relative">
-            <Search
-              size={19}
-              strokeWidth={2}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-
-            <input
-              type="search"
-              placeholder="Search..."
-              className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm 
-                    text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#0B1F3A] 
-                    focus:bg-white focus:ring-2 focus:ring-[#0B1F3A]/10"
-            />
-          </div>
+        {/* ShopEase Logo */}
+        <div className="select-none text-lg font-bold tracking-tight sm:text-xl">
+          <span className="text-[#F97316]">Shop</span>
+          <span className="text-[#0B1F3A]">Ease</span>
         </div>
       </div>
 
       {/* Right */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Mobile Search */}
-        <button
-          type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 
-                        transition-colors hover:bg-gray-100 hover:text-[#0B1F3A] md:hidden"
-          aria-label="Search"
+        {/* System Status */}
+        <div
+          className="hidden items-center gap-2 rounded-lg bg-green-50 px-3 py-2 sm:flex"
         >
-          <Search size={20} />
-        </button>
+          <Circle
+            size={8}
+            fill="currentColor"
+            className="text-green-500"
+          />
 
-        {/* Notifications */}
-        <button
-          type="button"
-          className="relative flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 
-                        transition-colors hover:bg-gray-100 hover:text-[#0B1F3A]"
-          aria-label="Notifications"
+          <span className="text-xs font-medium text-green-700">
+            Online
+          </span>
+        </div>
+
+        {/* Mobile Status */}
+        <div
+          className="flex h-10 w-10 items-center justify-center rounded-lg sm:hidden"
+          title="Online"
+          aria-label="Online"
         >
-          <Bell size={20} />
-
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#F97316] ring-2 ring-white" />
-        </button>
+          <Circle
+            size={9}
+            fill="currentColor"
+            className="text-green-500"
+          />
+        </div>
 
         {/* Divider */}
         <div className="hidden h-8 w-px bg-gray-200 sm:block" />
 
         {/* Profile */}
-        <div className="relative">
+        <div ref={profileRef} className="relative">
           <button
             type="button"
             onClick={() => setIsProfileOpen((prev) => !prev)}
-            className="flex items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-gray-50 
-                        focus:outline-none focus:ring-2 focus:ring-[#0B1F3A]/10"
+            className="flex items-center gap-2 rounded-lg p-1.5 transition-colors 
+                      hover:bg-gray-50 focus:outline-none 
+                      focus:ring-2 focus:ring-[#0B1F3A]/10"
+            aria-expanded={isProfileOpen}
+            aria-haspopup="menu"
           >
             {/* Avatar */}
             <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0B1F3A] 
-                            text-sm font-semibold text-white"
+              className="flex h-9 w-9 shrink-0 items-center justify-center 
+                        rounded-full bg-[#0B1F3A] text-sm font-semibold text-white"
             >
               AD
             </div>
@@ -95,7 +124,7 @@ const AdminHeader = ({ onMenuClick }) => {
             {/* User info */}
             <div className="hidden text-left lg:block">
               <p className="text-sm font-semibold leading-5 text-gray-900">
-                Admin
+                { user ? user.fullName : "Admin"}
               </p>
 
               <p className="text-xs leading-4 text-gray-500">
@@ -113,10 +142,13 @@ const AdminHeader = ({ onMenuClick }) => {
 
           {/* Profile Dropdown */}
           {isProfileOpen && (
-            <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+            <div
+              className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden 
+                        rounded-xl border border-gray-200 bg-white shadow-lg"
+            >
               <div className="border-b border-gray-100 px-4 py-3">
                 <p className="text-sm font-semibold text-gray-900">
-                  Admin
+                  { user ? user.fullName : "Admin"}
                 </p>
 
                 <p className="mt-0.5 text-xs text-gray-500">
@@ -125,19 +157,22 @@ const AdminHeader = ({ onMenuClick }) => {
               </div>
 
               <div className="p-1.5">
-                <button
+                {/* <button
                   type="button"
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium 
-                            text-gray-600 transition-colors hover:bg-gray-50 hover:text-[#0B1F3A]"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 
+                            text-sm font-medium text-gray-600 transition-colors 
+                            hover:bg-gray-50 hover:text-[#0B1F3A]"
                 >
                   <User size={16} />
                   Profile
-                </button>
+                </button> */}
 
                 <button
                   type="button"
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium 
-                            text-red-600 transition-colors hover:bg-red-50"
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 
+                            text-sm font-medium text-red-600 transition-colors 
+                            hover:bg-red-50"
                 >
                   <LogOut size={16} />
                   Logout

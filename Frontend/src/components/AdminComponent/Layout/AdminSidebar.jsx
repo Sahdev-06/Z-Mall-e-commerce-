@@ -42,11 +42,11 @@ const navigationItems = [
     icon: Users,
     path: "/admin/users",
   },
-  {
-    label: "Inventory",
-    icon: Warehouse,
-    path: "/admin/inventory",
-  },
+  // {
+  //   label: "Inventory",
+  //   icon: Warehouse,
+  //   path: "/admin/inventory",
+  // },
   {
     label: "Coupons",
     icon: TicketPercent,
