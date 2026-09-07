@@ -1,6 +1,6 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { ApiError } from '../utils/apiError.js';
-import { ApiResponse } from '../utils/apiResponse.js';
+import { ApiError } from '../utils/ApiError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 import { uploadOnCloudinary } from '../services/cloudinary.js';
 import { Category } from '../models/category.model.js';
 import mongoose from 'mongoose';
@@ -125,15 +125,59 @@ const deleteCategory = asyncHandler(async (req, res) => {
 })
 
 const getAllCategories = asyncHandler(async (req, res) => {
-    const categories = await Category.find()
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const { search } = req.query;
+
+    const skip = (page - 1) * limit
+
+    const filter = {};
+
+    if(search) {
+        filter.$or = [
+            { name : { $regex : search, $options : "i" }},
+            { description : { $regex : search, $options : "i" }}
+        ]
+    }
+
+    const categories = await Category.find(filter)
+        .skip(skip)
+        .limit(limit)
+
+    const total = await Category.countDocuments(filter)
+    const totalPages = Math.ceil(total / limit)
 
     if(!categories || categories.length === 0) {
-        throw new ApiError(404, "No categories found")
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    categories : [],
+                    currentPage : page,
+                    totalPages,
+                    totalCategories : total
+                },
+                "No Categories found"
+            )
+        )
     }
 
     return res
     .status(200)
-    .json(new ApiResponse(200, categories, "All categories fetched successfully"))
+    .json(
+        new ApiResponse(
+            200, 
+            {
+                categories,
+                currentPage : page,
+                totalPages,
+                totalCategories : total
+            }, 
+            "All categories fetched successfully"
+        )
+    )
 })
 
 const getCategoryById = asyncHandler(async (req, res) => {

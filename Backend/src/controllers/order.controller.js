@@ -5,13 +5,14 @@ import { Order } from '../models/order.model.js';
 import { Cart } from '../models/cart.model.js';
 import { Address } from '../models/address.model.js';
 import { Product } from '../models/product.model.js'
+import { Coupon } from '../models/coupon.model.js';
 import { createInventoryLog } from '../controllers/inventoryLog.controller.js'
 import mongoose from 'mongoose';
 
 
 const createOrder = asyncHandler(async (req, res) => {
     const { _id : userId } = req.user
-    const { addressId, paymentMethod } = req.body
+    const { addressId, paymentMethod, couponCode } = req.body
 
     if(!addressId || !mongoose.Types.ObjectId.isValid(addressId)) {
         throw new ApiError(404, 'Invalid address ID')
@@ -27,12 +28,56 @@ const createOrder = asyncHandler(async (req, res) => {
         throw new ApiError(404, 'Cart is empty')
     }
 
+    let coupon = null;
+    let couponDiscount = 0;
+
+    if (couponCode) {
+        const normalizedCode = couponCode.trim().toUpperCase();
+
+        coupon = await Coupon.findOne({ code: normalizedCode });
+
+        if (!coupon) {
+            throw new ApiError(404, "This coupon does not exist");
+        }
+
+        if (!coupon.isActive) {
+            throw new ApiError(400, "This coupon is not active");
+        }
+
+        const today = new Date();
+
+        if (coupon.expiryDate < today) {
+            throw new ApiError(400, "This coupon has already expired");
+        }
+    }
+
     let itemsTotalPrice = 0
     let discountAmount = 0;
 
     for(const item of cart.items) {
         itemsTotalPrice += item.product.price * item.quantity
         discountAmount += (item.product.price * (item.product.discount / 100)) * item.quantity
+    }
+
+    if (coupon) {
+        if (itemsTotalPrice < coupon.minimumOrderAmount) {
+            throw new ApiError(
+                400,
+                `Minimum order amount must be ${coupon.minimumOrderAmount}`
+            );
+        }
+
+        if (coupon.discountType === "Percentage") {
+            couponDiscount = itemsTotalPrice * (coupon.discount / 100);
+        }
+
+        if (coupon.discountType === "Fixed") {
+            if (itemsTotalPrice < coupon.discount) {
+                throw new ApiError(400, "Insufficient amount to use coupon");
+            }
+
+            couponDiscount = coupon.discount;
+        }
     }
 
     const cartItems = []
@@ -70,7 +115,9 @@ const createOrder = asyncHandler(async (req, res) => {
 
     let shippingFee = 0;
 
-    const finalPrice = (itemsTotalPrice + shippingFee) - discountAmount
+    const finalPrice =
+        (itemsTotalPrice + shippingFee) - discountAmount - couponDiscount
+
     for(const item of cart.items) {
         const currentStock = item.product.stock
         const itemQty = item.quantity
@@ -85,6 +132,14 @@ const createOrder = asyncHandler(async (req, res) => {
         shippingAddress : selectedAddress, 
         itemsPrice : itemsTotalPrice,  
         discountAmount : discountAmount.toFixed(2),
+
+        coupon: coupon
+            ? {
+                code: coupon.code,
+                discountAmount: couponDiscount
+            }
+            : undefined,
+
         totalAmount : finalPrice,
         paymentMethod,
     })
@@ -282,11 +337,10 @@ const cancelOrder = asyncHandler(async (req, res) => {
     }
 
     order.orderStatus = 'Cancelled'
+    order.paymentStatus = 'Cancelled'
     order.cancelledAt = new Date()
 
     await order.save()
-
-    console.log("order : ", order)
 
     // create inventory
     for(const item of order.orderItems) {
@@ -315,17 +369,64 @@ const cancelOrder = asyncHandler(async (req, res) => {
 })
 
 const getAllOrders = asyncHandler(async (req, res) => {
-    const orders = await Order.find().sort({ createdAt : -1 })
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const { search, status } = req.query;
+
+    const filter = {}
+
+    if(search) {
+        filter["shippingAddress.fullName"] = {
+            $regex : search,
+            $options : "i"
+        }
+    }
+
+    if(status) {
+        filter.orderStatus = status
+    }
+
+    const skip = (page - 1) * limit;
+
+    const orders = await Order.find(filter)
+        .sort({ createdAt : -1 })
+        .skip(skip)
+        .limit(limit)
+
+    const total = await Order.countDocuments(filter);
+    const totalPages = Math.ceil(total / limit);
 
     if(!orders || orders.length === 0) {
         return res
         .status(200)
-        .json(new ApiResponse(200, [], 'No orders found'))
+        .json(
+            new ApiResponse(
+                200, 
+                {
+                    orders : [],
+                    currentPage : page,
+                    totalPages,
+                    totalOrders : total
+                }, 
+                'No orders found'
+            )
+        )
     }
 
     return res
     .status(200)
-    .json(new ApiResponse(200, orders, 'All orders fetched successfully'))
+    .json(
+        new ApiResponse(
+            200,
+            {
+                orders,
+                currentPage : page,
+                totalPages,
+                totalOrders : total
+            }, 
+            'All orders fetched successfully'
+        )
+    )
 })
 
 const updateOrderStatus = asyncHandler(async (req, res) => {
@@ -350,6 +451,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     
     if(status === 'Delivered') {
         order.deliveredAt = new Date()
+        order.paymentStatus = 'Paid'
     }
 
     if(status === 'Cancelled') {

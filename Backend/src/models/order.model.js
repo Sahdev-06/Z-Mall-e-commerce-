@@ -93,6 +93,17 @@ const orderSchema = new mongoose.Schema(
             min : 0,
             default : 0
         },
+        coupon: {
+            code: {
+                type: String,
+                trim: true
+            },
+            discountAmount: {
+                type: Number,
+                min: 0,
+                default: 0
+            }
+        },
         totalAmount : {
             type : Number,
             min : 0,
@@ -106,7 +117,7 @@ const orderSchema = new mongoose.Schema(
         },
         paymentStatus : {
             type : String,
-            enum : ['Pending', 'Paid', 'Failed', 'Refunded'],
+            enum : ['Pending', 'Paid', 'Failed', 'Refunded', 'Cancelled'],
             default : 'Pending',
             required : true
         },

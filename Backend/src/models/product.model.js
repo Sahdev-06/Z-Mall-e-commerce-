@@ -48,6 +48,10 @@ const productSchema = new mongoose.Schema(
         isFeatured : {
             type : Boolean,
             default : false
+        },
+        searchKeywords: {
+            type: [String],
+            default: []
         }
     }, 
     { timestamps : true }

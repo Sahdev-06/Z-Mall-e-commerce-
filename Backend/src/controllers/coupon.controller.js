@@ -196,17 +196,63 @@ const deleteCoupon = asyncHandler(async (req, res) => {
 })
 
 const getAllCoupons = asyncHandler(async (req, res) => {
-    const coupons = await Coupon.find()
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const { search, type } = req.query;
+    
+    const filter = {};
+
+    if(search) {
+        filter["code"] = {
+            $regex : search,
+            $options : "i"
+        }
+    }
+
+    if(type) {
+        filter.discountType = type
+    }
+
+    const skip = (page - 1) * limit
+
+    const coupons = await Coupon.find(filter)
+        .skip(skip)
+        .limit(limit)
+
+    const total = await Coupon.countDocuments(filter)
+    const totalPages = Math.ceil(total / limit)
 
     if(coupons.length === 0) {
         return res
         .status(200)
-        .json(new ApiResponse(200, [], 'No coupon found'))
+        .json(
+            new ApiResponse(
+                200, 
+                {
+                    orders : [],
+                    currentPage : page,
+                    totalPages,
+                    totalCoupons : total
+                }, 
+                'No coupon found'
+            )
+        )
     }
 
     return res
     .status(200)
-    .json(new ApiResponse(200, coupons, 'All coupons fetched successfully'))
+    .json(
+        new ApiResponse(
+            200, 
+            {
+                coupons,
+                currentPage : page,
+                totalPages,
+                totalCoupons : total
+            }, 
+            'All coupons fetched successfully'
+        )
+    )
 })
 
 const applyCoupon = asyncHandler(async (req, res) => {
@@ -240,8 +286,10 @@ const applyCoupon = asyncHandler(async (req, res) => {
     }
 
     let totalAmount = 0;
+    let discount = 0;
     for(const item of cart.items) {
         totalAmount += item.product.price * item.quantity
+        discount += (item.product.price * (item.product.discount / 100)) * item.quantity
     }
 
     if(totalAmount < coupon.minimumOrderAmount) {
@@ -253,7 +301,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
 
     if(coupon.discountType === 'Percentage') {
         discountAmount = totalAmount * (coupon.discount / 100)
-        finalAmount = totalAmount - discountAmount
+        finalAmount = totalAmount - (discountAmount + discount)
     }
 
     if(coupon.discountType === 'Fixed') {
@@ -261,7 +309,7 @@ const applyCoupon = asyncHandler(async (req, res) => {
             throw new ApiError(400, 'Insufficient amount to use coupon')
         }
         discountAmount = coupon.discount
-        finalAmount = totalAmount - discountAmount
+        finalAmount = totalAmount - (discountAmount + discount)
     }
 
     const couponDetails = {

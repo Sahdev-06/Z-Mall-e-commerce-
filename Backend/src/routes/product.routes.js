@@ -12,7 +12,9 @@ import {
     getTopDealsProducts, 
     toggleFeaturedProduct, 
     updateProduct, 
-    updateProductStock
+    updateProductStock,
+    getProductsByCategory,
+    getProductRecommendations
 } from "../controllers/product.controller.js";
 import { verifyAdmin } from "../middlewares/admin.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -36,6 +38,8 @@ router.route("/get-product/:id").get(getProductById)
 router.route("/featured").get(getFeaturedProducts)
 router.route("/top-deals").get(getTopDealsProducts)
 router.route("/new-arrivals").get(getNewArrivalProducts)
+router.route("/category").get(getProductsByCategory)
+router.route("/recommendations/:id").get(getProductRecommendations)
 
 
 

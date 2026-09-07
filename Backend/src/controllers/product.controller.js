@@ -8,13 +8,30 @@ import mongoose from "mongoose";
 
 // Admin controller
 const createProduct = asyncHandler(async (req, res) => {
-    const { name, description, price, image, category, subCategory, discount, stock } = req.body;
+    let { name, description, price,  category, subCategory, discount, stock, searchKeywords } = req.body;
 
     if (!name || String(name).trim() === "") {
         throw new ApiError(400, "Product name is required");
     }
     if (!description || String(description).trim() === "") {
         throw new ApiError(400, "Product description is required");
+    }
+
+    // searchKeywords validation
+    if (searchKeywords !== undefined) {
+        if (typeof searchKeywords !== "string") {
+            throw new ApiError(400, "Search keywords must be a string");
+        }
+    }
+
+    // convert string → array
+    let keywords = [];
+
+    if (searchKeywords) {
+        keywords = searchKeywords
+            .split(",")
+            .map(keyword => keyword.trim().toLowerCase())
+            .filter(Boolean);
     }
 
     const priceNum = Number(price);
@@ -70,7 +87,8 @@ const createProduct = asyncHandler(async (req, res) => {
         discount : discountVal,
         stock : stockVal,
         category,
-        subCategory
+        subCategory,
+        searchKeywords : keywords
     })
 
     if(stock > 0) {
@@ -91,7 +109,7 @@ const createProduct = asyncHandler(async (req, res) => {
 })
 
 const updateProduct = asyncHandler(async (req, res) => {
-    const { name, description, price } = req.body;
+    let { name, description, price, searchKeywords } = req.body;
     const { id } = req.params;
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -112,6 +130,19 @@ const updateProduct = asyncHandler(async (req, res) => {
     if (description !== undefined) {
         if (String(description).trim() === "") throw new ApiError(400, "Description cannot be empty");
         updateDetails.description = String(description).trim();
+    }
+
+    if (searchKeywords !== undefined) {
+        if (typeof searchKeywords !== "string") {
+            throw new ApiError(400, "Search keywords must be a string");
+        }
+
+        const keywords = searchKeywords
+            .split(",")
+            .map(keyword => keyword.trim().toLowerCase())
+            .filter(Boolean);
+
+        updateDetails.searchKeywords = keywords;
     }
 
     if (price !== undefined) {
@@ -139,6 +170,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     if (Object.keys(updateDetails).length === 0) {
         throw new ApiError(400, "At least one field is required to update");
     }
+
 
     const product = await Product.findByIdAndUpdate(
         id,
@@ -233,15 +265,66 @@ const deleteProduct = asyncHandler(async (req, res) => {
 })
 
 const getAllProductForAdmin = asyncHandler(async (req, res) => {
-    const product = await Product.find().populate("category").populate("subCategory")
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const { search, category } = req.query;
+    
+    const skip = (page - 1) * limit
+
+    const filter = {};
+
+    if(search) {
+        filter.$or = [
+            { name : { $regex : search, $options : "i" }},
+            { description : { $regex : search, $options : "i" }},
+            { searchKeywords: { $regex : search, $options: "i" }}
+        ]
+    }
+
+    if(category) {
+        filter.category = category
+    }
+
+    const product = await Product.find(filter)
+        .populate("category")
+        .populate("subCategory")
+        .skip(skip)
+        .limit(limit)
+
+    const total = await Product.countDocuments(filter)
+    const totalPages = Math.ceil(total / limit)
 
     if(!product || product.length === 0) {
-        throw new ApiError(404, "Products not found")
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    product : [],
+                    currentPage : page,
+                    totalPages,
+                    totalProducts : total
+                },
+                "No products found"
+            )
+        )
     }
 
     return res
     .status(200)
-    .json(new ApiResponse(200, product, "All Products fetched successfully"))
+    .json(
+        new ApiResponse(
+            200, 
+            {
+                product,
+                currentPage : page,
+                totalPages,
+                totalProducts : total
+            }, 
+            "All Products fetched successfully"
+        )
+    )
 })
 
 const getProductByIdForAdmin = asyncHandler(async (req, res) => {
@@ -317,7 +400,8 @@ const getProducts = asyncHandler(async (req, res) => {
     if(search && search.trim() !== "") {
         filter.$or = [
             { name : { $regex:search.trim(), $options: "i"} },
-            { description : { $regex:search.trim(), $options: "i"} }
+            { description : { $regex:search.trim(), $options: "i"} },
+            { searchKeywords: { $regex: search.trim(), $options: "i" } }
         ]
     }
 
@@ -625,6 +709,132 @@ const getNewArrivalProducts = asyncHandler(async (req, res) => {
     )
 })
 
+const getProductsByCategory = asyncHandler(async (req, res) => {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const categoryId = req.query.categoryId
+
+    const skip = ( page - 1 ) * limit
+
+    if(!categoryId || !mongoose.Types.ObjectId.isValid(categoryId)) {
+        throw new ApiError(400, "Invalid category ID")
+    }
+
+    const products = await Product.find({
+        isActive : true,
+        category : categoryId
+    })
+    .populate("category")
+    .populate("subCategory")
+    .skip(skip)
+    .limit(limit)
+
+    if(products.length === 0) {
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    products : [],
+                    pagination: {
+                        currentPage: page,
+                        limit,
+                        totalProducts: 0,
+                        totalPages: 0
+                    }
+                },
+                "No products found for this category"
+            )
+        )
+    }
+
+    const totalProducts = await Product.countDocuments({ isActive : true, category : categoryId})
+
+    const totalPages = Math.ceil(totalProducts / limit)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                products : products,
+                pagination: {
+                    currentPage: page,
+                    limit,
+                    totalProducts: totalProducts,
+                    totalPages
+                }
+            },
+            "New arrival products fetched successfully"
+        )
+    )
+})
+
+const getProductRecommendations = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if(!id || !mongoose.Types.ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid ID")
+    }
+
+    const product = await Product.findById(id)
+
+    const similarProducts = await Product.aggregate([
+        {
+            $match : {
+                subCategory : product.subCategory,
+                _id : { $ne : product._id}
+            }
+        },
+        {
+            $sample : {
+                size : 10
+            }
+        }
+    ])
+
+    if(!similarProducts) {
+        return res
+        .status(200)
+        .json(new ApiResponse(200, [], "No similar products found"))
+    }
+
+    const recommendedProducts = await Product.aggregate([
+        {
+            $match : {
+                category : product.category,
+                _id : { $ne : product._id }
+            }
+        },
+        {
+            $sample : {
+                size : 10
+            }
+        }
+    ])
+
+    if(!recommendedProducts) {
+        return res
+        .status(200)
+        .json(new ApiResponse(200, [], "No recommended products are available"))
+    }
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200, 
+            {
+                similarProducts,
+                recommendedProducts
+            }, 
+            "Similar products fetched successfully"
+        )
+    )
+})
+
 export {
     createProduct,
     updateProduct,
@@ -638,5 +848,7 @@ export {
     getProductById,
     getFeaturedProducts,
     getTopDealsProducts,
-    getNewArrivalProducts
+    getNewArrivalProducts,
+    getProductsByCategory,
+    getProductRecommendations
 }

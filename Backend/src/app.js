@@ -4,6 +4,7 @@ import cors from "cors"
 
 const app = express()
 
+
 app.use(cors({
     origin : process.env.CORS_ORIGIN,
     credentials : true
@@ -28,6 +29,7 @@ import inventoryRouter from "./routes/inventoryLog.routes.js"
 import reviewRouter from "./routes/review.routes.js"
 import couponRouter from "./routes/coupon.routes.js"
 import bannerRouter from "./routes/banner.routes.js"
+import dashboardRouter from "./routes/dashboard.routes.js"
 
 import errorHandler from "./middlewares/error.middleware.js"
 
@@ -45,6 +47,7 @@ app.use("/api/v1/inventory", inventoryRouter)
 app.use("/api/v1/reviews", reviewRouter)
 app.use("/api/v1/coupon", couponRouter)
 app.use("/api/v1/banner", bannerRouter)
+app.use("/api/v1/dashboard", dashboardRouter)
 
 app.use(errorHandler)
 

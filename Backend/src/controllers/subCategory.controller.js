@@ -101,16 +101,62 @@ const deleteSubCategory = asyncHandler(async (req, res) => {
 })
 
 const getAllSubCategories = asyncHandler(async (req, res) => {
-    const subCategories = await SubCategory.find().populate("category")
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 30;
+    const { search, category } = req.query;
+
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+
+    if(search) {
+        filter["name"] = {
+            $regex : search,
+            $options : "i"
+        }
+    }
+
+    if(category) {
+        filter.category = category
+    }
+
+    const subCategories = await SubCategory.find(filter)
+        .populate("category")
+        .skip(skip)
+        .limit(limit)
+
+    const total = await SubCategory.countDocuments(filter)
+    const totalPages = Math.ceil(total / limit)
 
     if(!subCategories || subCategories.length === 0) {
-        throw new ApiError(404, "No subCategories found")
+        return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    subCategories : [],
+                    currentPage : page,
+                    totalPages,
+                    totalSubCategories : total
+                }
+            )
+        )
     }
 
     return res
     .status(200)
     .json(
-        new ApiResponse(200, subCategories, "All SubCategories fetched Successfully")
+        new ApiResponse(
+            200, 
+            {
+                subCategories,
+                currentPage : page,
+                totalPages,
+                totalSubCategories : total
+            }, 
+            "All SubCategories fetched Successfully"
+        )
     )
 })
 
