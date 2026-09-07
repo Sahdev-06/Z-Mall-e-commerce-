@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import { getCurrentUser } from "../services/authService";
 import Loading from "../components/Common/Loading";
+import AccessDenied from "../components/Common/AccessDenied"
 
 function ProtectedRoutes() {
     const [loading, setLoading] = useState(true)
@@ -32,6 +33,10 @@ function ProtectedRoutes() {
 
     if(!user) {
         return <Navigate to="/admin/login" replace />
+    }
+
+    if(user.role !== "admin") {
+        return <AccessDenied />
     }
 
     return (

@@ -18,7 +18,7 @@ function Payment() {
 
     const { showToast } = useToast();
     const { selectedAddress } = useAddress();
-    const { refreshCart } = useCart();
+    const { refreshCart, coupon } = useCart();
 
     const [paymentMethod, setPaymentMethod] = useState("")
 
@@ -30,16 +30,14 @@ function Payment() {
             return;
         }
 
-        // const orderData = {
-        //     paymentMethod,
-        //     addressId : selectedAddress?._id
-        // }
-
         const orderData = {}
         if(state.checkoutType === 'cart') {
             orderData.paymentMethod = paymentMethod
             orderData.addressId = selectedAddress?._id
 
+            if(coupon) {
+                orderData.couponCode = coupon.coupon
+            }
         }
 
         if(state.checkoutType === 'buy-now') {
@@ -49,16 +47,19 @@ function Payment() {
             orderData.quantity = state.quantity
         }
 
-        console.log("order data : ", orderData)
         
         try {
             if(state.checkoutType === 'cart') {
                 const result = await createOrder(orderData)
                 refreshCart()
-                navigate("/order-confirmation")
+                navigate("/order-confirmation", {
+                    state : { id : result.data._id }
+                })
             } else if(state.checkoutType === 'buy-now') {
                 const result = await createBuyNowOrder(orderData)
-                navigate("/order-confirmation")
+                navigate("/order-confirmation", {
+                    state : { id : result.data._id }
+                })
             }
         } catch (error) {
             console.log(error)
@@ -88,7 +89,9 @@ function Payment() {
                 {/* Back Button */}
                 <button
                     type="button"
-                    onClick={() => navigate("/checkout/address")}
+                    onClick={() => navigate("/checkout/address", {
+                        state : state
+                    })}
                     className="
                         mb-5
                         inline-flex
@@ -136,6 +139,7 @@ function Payment() {
                     <aside className="lg:col-span-1">
                         <SummaryCard 
                             handleOrderPlaced={handleOrderPlaced}
+                            state={state}
                         />
                     </aside>
 
@@ -147,6 +151,7 @@ function Payment() {
             <FixedPaymenttBar 
                 btnText={"Place Order"}
                 handleOrderPlaced={handleOrderPlaced}
+                state={state}
             />
         </div>
     )

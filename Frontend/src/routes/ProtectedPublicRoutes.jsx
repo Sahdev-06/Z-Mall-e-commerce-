@@ -12,12 +12,17 @@ function ProtectedPublicRoutes() {
         return <Loading />
     }
 
+
     if(!user) {
         return <Navigate 
                     to="/login"
                     state={{ from : location }}
                     replace
                 />
+    }
+
+    if(user.role !== "customer"){
+        return <Navigate to="/" replace />
     }
 
     return (

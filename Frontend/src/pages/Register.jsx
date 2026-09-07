@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom"
 import { registerUser } from "../services/authService.js"
 import Logo from "../components/Header/Logo"
 import validateUser from "../utils/userValidation.js"
+import { useAuth } from "../context/AuthContext.jsx"
 
 function Register() {
     const navigate = useNavigate();
+    const { setUser } = useAuth();
 
     const [formData, setFormData] = useState({
         fullName: "",
@@ -53,6 +55,7 @@ function Register() {
             }
 
             const result = await registerUser(userData)
+            setUser(result.data.user)
             navigate("/")
         } catch (error) {
             console.log(error)

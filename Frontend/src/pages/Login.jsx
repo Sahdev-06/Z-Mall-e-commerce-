@@ -1,12 +1,21 @@
 import { Link } from "react-router-dom"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { loginUser } from "../services/authService.js"
 import Logo from "../components/Header/Logo"
+import { useToast } from "../context/ToastContext.jsx"
+import { useAuth } from "../context/AuthContext.jsx"
 
 
 function LoginForm() {
+    const { setUser } = useAuth();
+
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const from = location.state?.from;
+
+    const { showToast } = useToast();
 
     const [formData, setFormData] = useState({
         email: "",
@@ -72,9 +81,11 @@ function LoginForm() {
             }
 
             const result = await loginUser(userData)
-            navigate("/")
+            setUser(result.data.user)
+            showToast("Login successful", "success")
+            navigate(from || "/", { replace : true })
         } catch (error) {
-            console.log(error)
+            showToast(error.response?.data?.message || "Login failed", "error")
         } finally {
             setIsSubmitting(false)
         }
