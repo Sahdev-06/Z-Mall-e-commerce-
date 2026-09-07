@@ -1,8 +1,10 @@
 import axiosInstance from "../api/axios";
 
 
-const getAllSubCategories = async () => {
-    const response = await axiosInstance.get("/subCategory/all")
+const getAllSubCategories = async (page = 1, limit, search = "", category = "") => {
+    const response = await axiosInstance.get(
+        `/subCategory/all?page=${page}&limit=${limit}&search=${search}&category=${category}`
+    )
     return response.data
 }
 

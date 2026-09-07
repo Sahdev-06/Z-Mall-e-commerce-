@@ -20,8 +20,10 @@ const deleteCoupon = async (id) => {
     return response.data
 }
 
-const getAllCoupons = async () => {
-    const response = await axiosInstance.get("/coupon/all", )
+const getAllCoupons = async (page = 1, limit = 10, search = "", type = "") => {
+    const response = await axiosInstance.get(
+        `/coupon/all?page=${page}&limit=${limit}&search=${search}&type=${type}`
+    )
     return response.data
 }
 

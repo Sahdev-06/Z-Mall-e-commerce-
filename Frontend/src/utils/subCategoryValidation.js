@@ -1,4 +1,4 @@
-const validateSubCategory = (formData, mode = "add") => {
+const validateSubCategory = (formData) => {
     const errors = {};
 
     // Name

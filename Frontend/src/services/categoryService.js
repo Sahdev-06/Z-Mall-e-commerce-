@@ -6,8 +6,10 @@ const createCategory = async (categoryData) => {
     return response.data
 }
 
-const getAllCategories = async () => {
-    const response = await axiosInstance.get("/category/all")
+const getAllCategories = async (page = 1, limit, search = "") => {
+    const response = await axiosInstance.get(
+        `/category/all?page=${page}&limit=${limit}&search=${search}`
+    )
     return response.data
 }
 

@@ -33,6 +33,11 @@ const validateProduct = (formData) => {
         errors.images = "Upload at least one image"
     }
 
+    // keywords
+    if(formData.keywords.length === 0) {
+        errors.keywords = "Please add some keywords"
+    }
+
     return errors
 }
 

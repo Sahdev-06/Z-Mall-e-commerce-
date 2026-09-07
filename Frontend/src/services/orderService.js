@@ -6,7 +6,12 @@ const createOrder = async (orderData) => {
     return response.data
 }
 
-const getAllOrders = async () => {
+const createBuyNowOrder = async (orderData) => {
+    const response = await axiosInstance.post("/order/buy-now", orderData)
+    return response.data
+}
+
+const getMyOrders = async () => {
     const response = await axiosInstance.get("/order/get")
     return response.data
 }
@@ -22,13 +27,15 @@ const cancelOrder = async (id) => {
 }
 
 // Admin API
-const getAllOrdersForAdmin = async () => {
-    const response = await axiosInstance.get("/order/get-all")
+const getAllOrders = async (page = 1, limit = 10, search = "", status = "") => {
+    const response = await axiosInstance.get(
+        `/order/get-all?page=${page}&limit=${limit}&search=${search}&status=${status}`
+    )
     return response.data
 }
 
-const updateOrderStatus = async (id) => {
-    const response = await axiosInstance.patch(`/order/${id}/status`)
+const updateOrderStatus = async (id, status) => {
+    const response = await axiosInstance.patch(`/order/${id}/status`, status)
     return response.data
 }
 
@@ -40,10 +47,11 @@ const getOrderByIdForAdmin = async (id) => {
 
 export {
     createOrder,
-    getAllOrders,
+    createBuyNowOrder,
+    getMyOrders,
     getOrderById,
     cancelOrder,
-    getAllOrdersForAdmin,
+    getAllOrders,
     updateOrderStatus,
     getOrderByIdForAdmin
 }

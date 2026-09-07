@@ -6,8 +6,10 @@ const createProduct = async (productData) => {
     return response.data
 }
 
-const getAllProductsForAdmin = async () => {
-    const response = await axiosInstance.get("/product/all")
+const getAllProductsForAdmin = async (page = 1, limit = 10, search = "", category = "") => {
+    const response = await axiosInstance.get(
+        `/product/all?page=${page}&limit=${limit}&search=${search}&category=${category}`
+    )
     return response.data
 }
 
@@ -93,6 +95,23 @@ const getNewArrivalProducts = async (page, limit, sort) => {
     return response.data
 }
 
+const getProductsByCategory = async (page, limit, categoryId) => {
+    const response = await axiosInstance.get("/product/category", {
+        params: {
+            page,
+            limit,
+            categoryId
+        }
+    })
+
+    return response.data
+}
+
+const getProductRecommendations  = async (id) => {
+    const response = await axiosInstance.get(`/product/recommendations/${id}`)
+    return response.data
+}
+
 
 export {
     createProduct,
@@ -107,5 +126,7 @@ export {
     featuredProduct,
     getFeaturedProducts,
     getTopDealsProducts,
-    getNewArrivalProducts
+    getNewArrivalProducts,
+    getProductsByCategory,
+    getProductRecommendations 
 }

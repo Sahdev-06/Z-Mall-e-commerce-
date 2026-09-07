@@ -1,4 +1,4 @@
-const validateCategory = (formData, mode = "add") => {
+const validateCategory = (formData) => {
     const errors = {};
 
     // Name
@@ -22,14 +22,10 @@ const validateCategory = (formData, mode = "add") => {
     }
 
     // Image
-    if (mode === "add") {
-
-        if (!formData.image) {
-            errors.image = "Please upload a category image.";
-        }
-
+    if(!formData.image) {
+        errors.image = "Please upload a category image."
     }
-
+    
     return errors;
 };
 
