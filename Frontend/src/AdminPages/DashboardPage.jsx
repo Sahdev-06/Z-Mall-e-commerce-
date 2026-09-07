@@ -19,7 +19,6 @@ function DashboardPage() {
         const result = await getDashboardStats()
         setStats(result.data)
         setRecentOrders(result.data.recentOrders)
-        console.log(result.data.recentOrders)
       } catch (error) {
         console.log(error)
       } finally {
