@@ -189,7 +189,7 @@ function ProfileCard({ isProfileOpen, setIsProfileOpen }) {
         {
             label: "Orders",
             icon: Package,
-            to: "/orders",
+            to: "/profile/orders",
         },
     ];
 

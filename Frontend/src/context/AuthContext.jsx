@@ -1,6 +1,7 @@
 import { createContext, useContext } from "react";
 import { useState, useEffect } from "react";
 import { getCurrentUser } from "../services/authService";
+import { logoutUser } from "../services/authService.js";
 
 const AuthContext = createContext()
 
@@ -24,13 +25,28 @@ export const AuthProvider = ({ children }) => {
         fetchCurrentUser();
     }, [])
 
+    const handleLogoutUser = async () => {
+        try {
+            const result = await logoutUser()
+            return result
+        } catch (error) {
+            throw error
+        } 
+    }
+
+    function clearUser() {
+        setUser(null)
+    }
+
 
     return (
         <AuthContext.Provider
             value={{
                 user,
                 setUser,
-                loading
+                loading,
+                handleLogoutUser,
+                clearUser
             }}
         >
             { children }
