@@ -6,9 +6,9 @@ function CategoryGrid({ categories }) {
         <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                 {
-                    categories.map(({ name, image }) => (
+                    categories.map(({ _id, name, image }) => (
                         <CategoryCard
-                            key={name}
+                            key={_id}
                             name={name}
                             image={image}
                         />

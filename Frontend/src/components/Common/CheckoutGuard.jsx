@@ -1,12 +1,15 @@
 import { useNavigate, useLocation } from "react-router-dom"
 import { useEffect, useState } from "react";
+import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
 import { getCartItems } from "../../services/cartService.js";
-import { getAllAddresses } from "../../services/addressService.js";
 import Loading from "./Loading.jsx";
 
-
-function PaymentGuard({ children }) {
+function CheckoutGuard({ children }) {
     const [isChecking, setIsChecking] = useState(true)
+
+    const { cartCount } = useCart();
+    const { showToast } = useToast();
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -15,31 +18,19 @@ function PaymentGuard({ children }) {
 
 
     useEffect(() => {
-
-        const checkCheckout = async () => {
+        const checkCart = async () => {
             try {
                 const cartResult = await getCartItems()
-                const addressResult = await getAllAddresses()
-
+    
                 const cartItems = cartResult.data.items
-                const addresses = addressResult.data
 
-                const selectedAddress = addresses.find(
-                    address => address.isDefault === true
-                )
-
-                if(checkoutType === 'cart') {
-                    if (cartItems.length === 0) {
+                if(checkoutType !== "buy-now") {
+                    if(cartItems.length === 0) {
                         navigate("/cart")
+                        showToast("Please add products to cart")
                         return
                     }
                 }
-
-                if (!selectedAddress) {
-                    navigate("/checkout/address")
-                    return
-                }
-
             } catch (error) {
                 console.log(error)
             } finally {
@@ -47,8 +38,7 @@ function PaymentGuard({ children }) {
             }
         }
 
-        checkCheckout()
-
+        checkCart();
     }, [navigate])
 
     if(isChecking) {
@@ -59,4 +49,4 @@ function PaymentGuard({ children }) {
 }
 
 
-export default PaymentGuard
+export default CheckoutGuard

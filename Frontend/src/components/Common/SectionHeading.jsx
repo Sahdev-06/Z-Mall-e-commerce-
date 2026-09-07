@@ -1,26 +1,24 @@
-import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom";
 
 function SectionHeading({ title, showViewAll, type }) {
-    const navigate = useNavigate();
-
-    function handleNavigate() {
-        navigate(`/products/${type}`)
-    }
 
     return (
         <>
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-slate-900 mb-6">
-                    {title}
+                {/* Section title */}
+                <h1 className="mb-4 text-xl font-semibold text-slate-900 sm:text-2xl lg:text-3xl
+                            min-w-0 truncate">
+                    {/* {title} */}
                 </h1>
                 {
                     showViewAll && (
-                        <button
-                            className="text-orange-500 hover:underline cursor-pointer"
-                            onClick={handleNavigate}
+                        <Link
+                            to={`/products/${type}`}
+                            className="text-sm text-orange-500 hover:underline sm:text-base"
+                            
                         >
                             view all
-                        </button>
+                        </Link>
                     )
                 }
             </div>

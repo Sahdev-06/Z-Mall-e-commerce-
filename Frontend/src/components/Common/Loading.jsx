@@ -9,7 +9,7 @@ function Loading() {
                 </div>
 
                 <p className="mt-4 text-gray-600 font-medium">
-                    Authenticating...
+                    Loading...
                 </p>
             </div>
         </>
