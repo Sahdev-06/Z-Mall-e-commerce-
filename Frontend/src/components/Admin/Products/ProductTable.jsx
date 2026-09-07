@@ -18,6 +18,10 @@ function ProductTable({ products, modal, selectedProduct }) {
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider 
                                     text-gray-500">
+                            featured
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider 
+                                    text-gray-500">
                             price
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider 
@@ -36,7 +40,7 @@ function ProductTable({ products, modal, selectedProduct }) {
                 </thead>
                 <tbody>
                     {
-                        products.map(({ _id, images, name, category, price, stock, isActive }) => (
+                        products.map(({ _id, images, name, category, price, stock, isActive, isFeatured }) => (
                             <ProductTableRow
                                 key={_id}
                                 _id={_id}
@@ -46,6 +50,7 @@ function ProductTable({ products, modal, selectedProduct }) {
                                 price={price}
                                 stock={stock}
                                 status={isActive}
+                                checked={isFeatured}
                                 modal={modal}
                                 selectedProduct={selectedProduct}
                             />

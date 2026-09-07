@@ -1,6 +1,11 @@
+import { useNavigate } from "react-router-dom"
 
+function PageHeader({ title, subtitle, buttonText, resource }) {
+    const navigate = useNavigate()
 
-function PageHeader({ title, subtitle, buttonText }) {
+    function openForm() {
+        navigate(`/admin/${resource}/new`)
+    }
     return (
         <>
             <div className="flex items-center justify-between">
@@ -13,7 +18,9 @@ function PageHeader({ title, subtitle, buttonText }) {
                     </p>
                 </div>
                 <button className="bg-orange-500 text-white px-5 py-2.5 hover:bg-orange-600 transition
-                                    rounded-xl">
+                                    rounded-xl"
+                    onClick={openForm}
+                >
                     + {buttonText}
                 </button>
             </div>

@@ -1,8 +1,8 @@
-import headphone from "../../../assets/headphone.png"
+import ToggleSwitch from '../../Common/ToggleSwitch';
 import { SquarePen, Trash2, PackagePlus } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 
-function ProductTableRow({ _id, image, name, category, price, stock, status, modal, selectedProduct }) {
+function ProductTableRow({ _id, image, name, category, price, stock, status, checked, modal, selectedProduct }) {
     const navigate = useNavigate()
 
     function handleNavigate() {
@@ -39,6 +39,9 @@ function ProductTableRow({ _id, image, name, category, price, stock, status, mod
                             {category}
                         </span>
                     </div>
+                </td>
+                <td className="px-6 py-4 text-slate-700 font-medium">
+                    <ToggleSwitch _id={_id} checked={checked}/>
                 </td>
                 <td className="px-6 py-4 text-slate-700 font-medium">
                     <span>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import validateProduct from "../../../utils/productValidation.js";
+import {validateProduct} from "../../../utils/productValidation.js";
 import { getAllCategories } from "../../../services/categoryService.js"
 import { getAllSubCategories } from "../../../services/subCategoryService.js";
 import { createProduct, updateProduct } from "../../../services/productService.js";
