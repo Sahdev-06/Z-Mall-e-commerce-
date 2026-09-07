@@ -1,9 +1,22 @@
 import { Handbag } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useCheckout } from "../../context/CheckoutContext";
 
 
-function SummaryCard({ handleOrderPlaced }) {
+function SummaryCard({ handleOrderPlaced, state }) {
     const { orderSummary, cartCount } = useCart();
+    const { subtotal, total, discount, quantity, checkoutType } = useCheckout();
+
+    const summary = checkoutType === 'buy-now'
+    ? {
+        subTotal : subtotal,
+        totalDiscount : discount,
+        total : total,
+    } : orderSummary
+
+    const productCount = checkoutType === "buy-now"
+    ? quantity
+    : cartCount
 
     return (
         <>
@@ -19,7 +32,7 @@ function SummaryCard({ handleOrderPlaced }) {
                         <Handbag className="w-4 h-4 text-orange-500" />
 
                         <span className="text-xs sm:text-sm text-orange-500">
-                            {cartCount} Items
+                            {productCount} Items
                         </span>
                     </div>
                 </div>
@@ -33,7 +46,7 @@ function SummaryCard({ handleOrderPlaced }) {
                         </p>
 
                         <span className="text-slate-900 font-medium">
-                            ₹{orderSummary.subTotal.toLocaleString("en-IN")}
+                            ₹{summary.subTotal.toLocaleString("en-IN")}
                         </span>
                     </div>
 
@@ -43,7 +56,7 @@ function SummaryCard({ handleOrderPlaced }) {
                         </p>
 
                         <span className="text-green-600 font-medium">
-                            -₹{orderSummary.totalDiscount.toLocaleString("en-IN")}
+                            - ₹{summary.totalDiscount.toLocaleString("en-IN")}
                         </span>
                     </div>
 
@@ -66,7 +79,7 @@ function SummaryCard({ handleOrderPlaced }) {
                         </p>
 
                         <span className="text-lg sm:text-xl font-semibold text-slate-900">
-                            ₹{orderSummary.total.toLocaleString("en-IN")}
+                            ₹{summary.total.toLocaleString("en-IN")}
                         </span>
                     </div>
                 </div>

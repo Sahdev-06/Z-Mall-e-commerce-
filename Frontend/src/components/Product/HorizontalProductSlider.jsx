@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
 
-function HorizontalProductSlider({ products, title, type }) {
+function HorizontalProductSlider({ products, title, type, showBtn, showView=true }) {
     const sliderRef = useRef(null);
 
     const handleScroll = (direction) => {
@@ -33,7 +33,7 @@ function HorizontalProductSlider({ products, title, type }) {
                                 type="button"
                                 aria-label="Previous products"
                                 onClick={() => handleScroll("prev")}
-                                className="flex h-6 w-9 items-center justify-center rounded-lg
+                                className="flex h-7 w-9 items-center justify-center rounded-lg
                                     border border-slate-200 bg-white text-slate-600
                                     transition hover:border-orange-500
                                     hover:bg-orange-50 hover:text-orange-500"
@@ -45,7 +45,7 @@ function HorizontalProductSlider({ products, title, type }) {
                                 type="button"
                                 aria-label="Next products"
                                 onClick={() => handleScroll("next")}
-                                className="flex h-6 w-9 items-center justify-center rounded-lg
+                                className="flex h-7 w-9 items-center justify-center rounded-lg
                                     border border-slate-200 bg-white text-slate-600
                                     transition hover:border-orange-500
                                     hover:bg-orange-50 hover:text-orange-500"
@@ -55,12 +55,14 @@ function HorizontalProductSlider({ products, title, type }) {
                         </div>
     
                         {/* View All */}
-                        <Link
-                            to={`/products/${type}`}
-                            className="text-sm font-medium text-orange-500 transition hover:text-orange-600"
-                        >
-                            View all
-                        </Link>
+                        {showView && (
+                            <Link
+                                to={`/products/${type}`}
+                                className="text-sm font-medium text-orange-500 transition hover:text-orange-600"
+                            >
+                                View all
+                            </Link>
+                        )}
                     </div>
                 </div>
     
@@ -83,19 +85,6 @@ function HorizontalProductSlider({ products, title, type }) {
                     {/* Mobile: 2 columns */}
                     {/* Tablet: 3 cards */}
                     {/* Desktop: 5 cards */}
-    
-                    {/* <div
-                        className="
-                            min-w-0
-                            sm:min-w-[calc((100%-2rem)/3)]
-                            sm:w-[calc((100%-2rem)/3)]
-                            lg:min-w-[calc((100%-5rem)/5)]
-                            lg:w-[calc((100%-5rem)/5)]
-                        "
-                    >
-                        <ProductCard />
-                    </div> */}
-
 
                     {
                         products.map(({ _id, name, discount, price, images }) => (
@@ -116,6 +105,7 @@ function HorizontalProductSlider({ products, title, type }) {
                                     discount={discount}
                                     price={price}
                                     images={images}
+                                    showBtn={showBtn}
                                 />
                             </div>
                         ))

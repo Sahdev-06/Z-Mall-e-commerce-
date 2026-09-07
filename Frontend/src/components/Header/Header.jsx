@@ -4,7 +4,7 @@ import Navbar from "./Navbar"
 function Header() {
     return (
         <>
-            <TopBar />
+            {/* <TopBar /> */}
             <Navbar />
         </>
     )

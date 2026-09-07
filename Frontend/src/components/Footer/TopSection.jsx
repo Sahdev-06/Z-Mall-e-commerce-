@@ -1,6 +1,11 @@
 import Logo from "../Header/Logo"
+import { Link } from "react-router-dom"
 
 function TopSection() {
+    const github = "https://github.com/Sahdev-06"
+    const linkedIn = "https://www.linkedin.com/in/sahdev-kumar-a092a539a/"
+    const twitter = "https://x.com/sahdev06"
+    
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-8 
@@ -17,11 +22,26 @@ function TopSection() {
                     <p className="font-semibold text-lg mb-4">
                         Quick Links
                     </p>
-                    <div className="space-y-3 text-gray-400">
-                        <p className="transition hover:text-orange-500">Home</p>
-                        <p className="transition hover:text-orange-500">Products</p>
-                        <p className="transition hover:text-orange-500">Wishlist</p>
-                        <p className="transition hover:text-orange-500">Cart</p>
+                    <div className="space-y-3 flex flex-col text-gray-400">
+                        <Link 
+                            to="/"
+                            className="transition hover:text-orange-500">
+                            Home
+                        </Link>
+                        <Link 
+                            to="/products"
+                            className="transition hover:text-orange-500">
+                            Products
+                        </Link>
+                        <Link 
+                            className="transition hover:text-orange-500">
+                            Wishlist
+                        </Link>
+                        <Link 
+                            to="/cart"
+                            className="transition hover:text-orange-500">
+                            Cart
+                        </Link>
                     </div>
 
                 </div>
@@ -42,10 +62,22 @@ function TopSection() {
                     <p className="font-semibold text-lg mb-4">
                         Follow Us
                     </p>
-                    <div className="space-y-3 text-gray-400">
-                        <p className="transition hover:text-orange-500">Github</p>
-                        <p className="transition hover:text-orange-500">LinkedIn</p>
-                        <p className="transition hover:text-orange-500">X (Twitter)</p>
+                    <div className="space-y-3 flex flex-col text-gray-400">
+                        <Link 
+                            to={github}
+                            className="transition hover:text-orange-500">
+                            Github
+                        </Link>
+                        <Link 
+                            to={linkedIn}
+                            className="transition hover:text-orange-500">
+                            LinkedIn
+                        </Link>
+                        <Link 
+                            to={twitter}
+                            className="transition hover:text-orange-500">
+                            X (Twitter)
+                        </Link>
                     </div>
                 </div>
             </div>

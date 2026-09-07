@@ -1,8 +1,8 @@
 import OrderCard from "./OrderCard"
 
-function OrderList({ orders }) {
+function OrderList({ orders,  }) {
     return (
-        <div className="flex flex-col gap-3">
+        <div className="flex w-full flex-col gap-4">
             {
                 orders.map(({ _id, orderItems, orderStatus, createdAt }) => (
                     <OrderCard 
@@ -11,7 +11,8 @@ function OrderList({ orders }) {
                         orderItems={orderItems}
                         orderStatus={orderStatus}
                         createdAt={createdAt}
-                        viewBtn={true}
+                        showViewDetails={true}
+                        showCancelOrder={false}
                     />
                 ))
             }

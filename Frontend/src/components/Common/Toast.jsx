@@ -10,7 +10,7 @@ function Toast() {
     const isSuccess = toast.type === "success";
 
     return (
-        <div className="fixed top-5 right-5 z-50">
+        <div className="fixed top-5 right-5 z-60">
             <div className={`
                 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg
                 bg-white border

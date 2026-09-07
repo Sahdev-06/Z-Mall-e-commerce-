@@ -1,9 +1,16 @@
 import { useCart } from "../../context/CartContext"
+import { useCheckout } from "../../context/CheckoutContext";
 import { ArrowRight } from "lucide-react";
 
 
 function FixedPaymenttBar({ btnText, handleOrderPlaced }) {
     const { orderSummary } = useCart();
+    const { total, checkoutType } = useCheckout();
+
+    const summary = checkoutType === 'buy-now'
+    ? {
+        total : total
+    } : orderSummary
 
     return (
             <>
@@ -17,7 +24,7 @@ function FixedPaymenttBar({ btnText, handleOrderPlaced }) {
                             </p>
                     
                             <p className="mt-0.5 truncate text-lg font-bold text-gray-900 sm:text-xl">
-                                ₹{orderSummary.total.toLocaleString('en-IN')}
+                                ₹{summary.total.toLocaleString('en-IN')}
                             </p>
                         </div>
     

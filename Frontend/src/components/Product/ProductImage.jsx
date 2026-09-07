@@ -1,23 +1,34 @@
-import { useState } from "react"
-import image from "../../assets/image"
+import { useState, useEffect } from "react"
+
 
 function ProductImage({ images }) {
-    const [selectedImage, setSelectedImage] = useState(image[0])
+    const [selectedImage, setSelectedImage] = useState(images[0])
+
+    useEffect(() => {
+        setSelectedImage(images[0])
+    }, [images])
+    
     return (
         <>
-            <div>
-                <div className="bg-white rounded-2xl shadow-sm p-8 flex justify-center items-center">
+            <div className="flex flex-col gap-4 md:flex-row-reverse">
+                {/* Main Image */}
+                <div className="aspect-square flex-1 overflow-hidden rounded-xl bg-gray-100">
                     <img
-                        className="w-full max-h-[450px] object-contain transition-transform
+                        className="w-full h-full object-contain transition-transform
                                     duration-300 hover:scale-105" 
                         src={selectedImage}
                         alt="product"
                     />
                 </div>
-                <div className="flex justify-center gap-4 mt-6">
+                {/* Thumbnails */}
+                <div 
+                    className="flex justify-center gap-3 overflow-x-auto md:w-16 md:flex-col
+                                md:items-center md:justify-center"
+                >
                     {
-                        image.map((img) => (
-                            <div className={`w-20 h-20 bg-white rounded-xl border cursor-pointer p-2
+                        images.map((img) => (
+                            <div className={`w-16 h-16 shrink-0 bg-white rounded-lg border cursor-pointer p-2
+                                        overflow-hidden
                                             ${selectedImage === img ? "border-orange-500" : "border-gray-200"}`}
                                 onClick={() => setSelectedImage(img)}
                                 key={img}>
