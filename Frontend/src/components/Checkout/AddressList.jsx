@@ -5,6 +5,7 @@ function AddressList({ addresses }) {
     const navigate = useNavigate();
     const location = useLocation();
 
+
     return (
         <>
             <section className="w-full">
@@ -22,7 +23,12 @@ function AddressList({ addresses }) {
                     <button
                         type="button"
                         onClick={() => navigate("/address/create", {
-                            state : { from : location }
+                            state : { 
+                                from : location,
+                                checkoutType : location.state?.checkoutType || null,
+                                productId : location.state?.productId || "",
+                                quantity : location.state?.quantity || null
+                            }
                         })}
                         className="text-sm font-medium text-orange-500 transition-colors cursor-pointer
                                 hover:text-orange-600 md:text-base"

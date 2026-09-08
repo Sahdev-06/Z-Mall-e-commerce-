@@ -12,6 +12,8 @@ function Address() {
 
     const location = useLocation();
     const from = location.state?.from;
+    const checkoutType = location.state?.checkoutType
+
 
     const { id } = useParams();
 
@@ -93,7 +95,13 @@ function Address() {
 
                 const result = await createAddress(addressData)
                 fetchAddresses()
-                navigate(from)
+                navigate(from, {
+                    state : {
+                        checkoutType,
+                        productId : location.state?.productId || "",
+                        quantity : location.state?.quantity || null
+                    }
+                })
 
             } else {
 

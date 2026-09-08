@@ -1,13 +1,14 @@
 import { ArrowRight, Tag } from "lucide-react";
 import { useCart } from "../../context/CartContext"
 import { useCheckout } from "../../context/CheckoutContext";
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useState } from "react";
 
 function OrderSummary({ btnText, navigateTo, state }) {
+    const location = useLocation()
     const { orderSummary, handleCouponSubmit } = useCart();
     const { subtotal, total, discount, quantity, checkoutType } = useCheckout();
-    console.log("state : ", state)
+
 
     const [formData, setFormData] = useState({
         code : "",
